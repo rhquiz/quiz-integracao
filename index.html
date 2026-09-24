@@ -248,6 +248,27 @@
       margin-top: 12px;
     }
 
+    .resultado-numero {
+      font-size: 56px;
+      font-weight: bold;
+      color: #222;
+      margin: 12px 0 5px;
+    }
+
+    .resultado-tempo {
+      background: #ebe5d9;
+      border-radius: 14px;
+      padding: 16px;
+      margin: 22px 0;
+      font-size: 20px;
+    }
+
+    .resultado-mensagem {
+      margin-top: 20px;
+      font-weight: bold;
+      color: #222 !important;
+    }
+
     @media (max-width: 600px) {
       body {
         padding: 12px;
@@ -271,13 +292,14 @@
       }
     }
   </style>
+
 </head>
 
 <body>
 
 <div class="app">
 
-  <!-- TELA CPF -->
+  <!-- TELA DE ENTRADA -->
   <section id="telaEntrada" class="card">
 
     <div class="logo">🏆</div>
@@ -314,7 +336,7 @@
   </section>
 
 
-  <!-- TELA CONFIRMAÇÃO -->
+  <!-- TELA DE CONFIRMAÇÃO -->
   <section id="telaConfirmacao" class="card oculto">
 
     <div class="logo">👋</div>
@@ -322,6 +344,7 @@
     <p>Olá,</p>
 
     <div id="nomeColaborador" class="nome"></div>
+
     <div id="setorColaborador" class="setor"></div>
 
     <div class="info">
@@ -332,8 +355,8 @@
     </div>
 
     <p>
-      Leia cada questão com atenção. Depois de começar,
-      seu tempo será registrado automaticamente.
+      Leia cada questão com atenção.
+      Depois de começar, seu tempo será registrado automaticamente.
     </p>
 
     <div id="erroInicio" class="erro"></div>
@@ -345,7 +368,7 @@
   </section>
 
 
-  <!-- TELA PROVA -->
+  <!-- TELA DA PROVA -->
   <section id="telaProva" class="card oculto">
 
     <div class="topo-prova">
@@ -373,58 +396,58 @@
   </section>
 
 
- <!-- TELA FINAL -->
-<section id="telaFinal" class="card final oculto">
+  <!-- TELA FINAL -->
+  <section id="telaFinal" class="card final oculto">
 
-  <div class="trofeu">🏆</div>
+    <div class="trofeu">🏆</div>
 
-  <h2>Desafio concluído!</h2>
+    <h2>Desafio concluído!</h2>
 
-  <p>Você acertou</p>
+    <p>Você acertou</p>
 
-  <div style="
-    font-size: 52px;
-    font-weight: bold;
-    color: #222;
-    margin: 12px 0 5px;
-  ">
-    <span id="resultadoAcertos">0</span>
-    /
-    <span id="resultadoTotal">11</span>
-  </div>
+    <div class="resultado-numero">
+      <span id="resultadoAcertos">0</span>
+      /
+      <span id="resultadoTotal">11</span>
+    </div>
 
-  <p>respostas corretas</p>
+    <p>respostas corretas</p>
 
-  <div style="
-    background: #ebe5d9;
-    border-radius: 14px;
-    padding: 15px;
-    margin: 22px 0;
-    font-size: 20px;
-  ">
-    ⏱️ Tempo:
-    <strong id="resultadoTempo">00:00</strong>
-  </
+    <div class="resultado-tempo">
+      ⏱️ Tempo:
+      <strong id="resultadoTempo">00:00</strong>
+    </div>
+
+    <p id="resultadoMensagem" class="resultado-mensagem">
+      Resultado registrado!
+    </p>
+
+    <p>
+      Acompanhe sua posição no
+      <strong>ranking no telão!</strong>
+    </p>
+
+  </section>
 
 </div>
 
 
 <script type="module">
 
-  /* ============================================
-     CONFIGURAÇÃO DO SUPABASE
-     ============================================ */
+  /* =====================================================
+     CONFIGURAÇÃO SUPABASE
+     ===================================================== */
 
   const SUPABASE_URL =
-   "https://tkyhrxvdpgslmwxokksi.supabase.co";
+    "https://tkyhrxvdpgslmwxokksi.supabase.co";
 
   const SUPABASE_KEY =
     "sb_publishable__bW5UZyxprdo5vfMPQLr3A_ddfUMVtO";
 
 
-  /* ============================================
-     ELEMENTOS
-     ============================================ */
+  /* =====================================================
+     ELEMENTOS DA TELA
+     ===================================================== */
 
   const telaEntrada =
     document.getElementById("telaEntrada");
@@ -468,10 +491,22 @@
   const cronometro =
     document.getElementById("cronometro");
 
+  const resultadoAcertos =
+    document.getElementById("resultadoAcertos");
 
-  /* ============================================
+  const resultadoTotal =
+    document.getElementById("resultadoTotal");
+
+  const resultadoTempo =
+    document.getElementById("resultadoTempo");
+
+  const resultadoMensagem =
+    document.getElementById("resultadoMensagem");
+
+
+  /* =====================================================
      VARIÁVEIS
-     ============================================ */
+     ===================================================== */
 
   let cpfAtual = "";
   let tentativaId = null;
@@ -479,11 +514,12 @@
   let indiceAtual = 0;
   let segundos = 0;
   let timer = null;
+  let salvandoResposta = false;
 
 
-  /* ============================================
-     SUPABASE RPC
-     ============================================ */
+  /* =====================================================
+     CHAMADA AO SUPABASE
+     ===================================================== */
 
   async function rpc(funcao, parametros = {}) {
 
@@ -507,17 +543,23 @@
     let dados = null;
 
     if (texto) {
+
       try {
         dados = JSON.parse(texto);
-      } catch {
+      }
+
+      catch {
         dados = texto;
       }
+
     }
 
     if (!resposta.ok) {
+
       const mensagem =
         dados?.message ||
         dados?.error ||
+        dados?.hint ||
         "Não foi possível concluir a operação.";
 
       throw new Error(mensagem);
@@ -527,9 +569,9 @@
   }
 
 
-  /* ============================================
-     CPF
-     ============================================ */
+  /* =====================================================
+     MÁSCARA CPF
+     ===================================================== */
 
   cpfInput.addEventListener("input", function () {
 
@@ -555,9 +597,9 @@
   });
 
 
-  /* ============================================
-     ENTRAR
-     ============================================ */
+  /* =====================================================
+     ENTRAR NO DESAFIO
+     ===================================================== */
 
   btnEntrar.addEventListener("click", async () => {
 
@@ -611,7 +653,7 @@
       }
 
       nomeColaborador.textContent =
-        participante.nome;
+        participante.nome || "";
 
       setorColaborador.textContent =
         participante.setor || "";
@@ -635,6 +677,7 @@
     finally {
 
       btnEntrar.disabled = false;
+
       btnEntrar.textContent =
         "ENTRAR NO DESAFIO";
 
@@ -643,15 +686,16 @@
   });
 
 
-  /* ============================================
+  /* =====================================================
      COMEÇAR PROVA
-     ============================================ */
+     ===================================================== */
 
   btnComecar.addEventListener("click", async () => {
 
     esconderErro("erroInicio");
 
     btnComecar.disabled = true;
+
     btnComecar.textContent =
       "PREPARANDO DESAFIO...";
 
@@ -664,6 +708,12 @@
         }
       );
 
+      if (!inicio || inicio.length === 0) {
+        throw new Error(
+          "Não foi possível iniciar o desafio."
+        );
+      }
+
       tentativaId =
         inicio[0].tentativa_id;
 
@@ -672,9 +722,11 @@
       );
 
       if (!perguntas || perguntas.length === 0) {
+
         throw new Error(
           "Nenhuma pergunta disponível."
         );
+
       }
 
       indiceAtual = 0;
@@ -686,6 +738,7 @@
       );
 
       iniciarCronometro();
+
       mostrarPergunta();
 
     }
@@ -702,6 +755,7 @@
     finally {
 
       btnComecar.disabled = false;
+
       btnComecar.textContent =
         "COMEÇAR DESAFIO";
 
@@ -710,11 +764,13 @@
   });
 
 
-  /* ============================================
+  /* =====================================================
      MOSTRAR PERGUNTA
-     ============================================ */
+     ===================================================== */
 
   function mostrarPergunta() {
+
+    esconderErro("erroProva");
 
     const p =
       perguntas[indiceAtual];
@@ -739,7 +795,7 @@
 
     opcoes.forEach(([letra, texto]) => {
 
-      if (!texto || !texto.trim()) {
+      if (!texto || !String(texto).trim()) {
         return;
       }
 
@@ -747,39 +803,58 @@
         document.createElement("button");
 
       botao.type = "button";
-      botao.className = "alternativa";
+
+      botao.className =
+        "alternativa";
 
       const spanLetra =
         document.createElement("span");
 
-      spanLetra.className = "letra";
-      spanLetra.textContent = letra;
+      spanLetra.className =
+        "letra";
+
+      spanLetra.textContent =
+        letra;
 
       const spanTexto =
         document.createElement("span");
 
-      spanTexto.textContent = texto;
+      spanTexto.textContent =
+        texto;
 
-      botao.appendChild(spanLetra);
-      botao.appendChild(spanTexto);
+      botao.appendChild(
+        spanLetra
+      );
+
+      botao.appendChild(
+        spanTexto
+      );
 
       botao.addEventListener(
         "click",
         () => responder(letra)
       );
 
-      alternativas.appendChild(botao);
+      alternativas.appendChild(
+        botao
+      );
 
     });
 
   }
 
 
-  /* ============================================
-     RESPONDER
-     ============================================ */
+  /* =====================================================
+     SALVAR RESPOSTA
+     ===================================================== */
 
   async function responder(letra) {
+
+    if (salvandoResposta) {
+      return;
+    }
+
+    salvandoResposta = true;
 
     esconderErro("erroProva");
 
@@ -808,9 +883,13 @@
 
       if (indiceAtual < perguntas.length) {
 
+        salvandoResposta = false;
+
         mostrarPergunta();
 
-      } else {
+      }
+
+      else {
 
         await finalizar();
 
@@ -819,6 +898,8 @@
     }
 
     catch (erro) {
+
+      salvandoResposta = false;
 
       botoes.forEach(
         botao => botao.disabled = false
@@ -834,63 +915,100 @@
   }
 
 
-  /* ============================================
-     FINALIZAR
-     ============================================ */
+  /* =====================================================
+     FINALIZAR PROVA
+     ===================================================== */
 
   async function finalizar() {
 
-  try {
+    try {
 
-    const resultado = await rpc(
-      "finalizar_prova",
-      {
-        p_tentativa_id: tentativaId
+      const resultado = await rpc(
+        "finalizar_prova",
+        {
+          p_tentativa_id: tentativaId
+        }
+      );
+
+      if (!resultado || resultado.length === 0) {
+
+        throw new Error(
+          "O resultado não foi retornado pelo sistema."
+        );
+
       }
-    );
 
-    clearInterval(timer);
+      clearInterval(timer);
 
-    const dados = resultado[0];
+      const dados =
+        resultado[0];
 
-    const acertos = dados.total_acertos;
-    const total = dados.total_perguntas;
-    const tempoSegundos = dados.tempo_segundos;
+      const acertos =
+        Number(dados.total_acertos ?? 0);
 
-    const minutos = Math.floor(tempoSegundos / 60);
-    const segundosRestantes = tempoSegundos % 60;
+      const total =
+        Number(
+          dados.total_perguntas ??
+          perguntas.length
+        );
 
-    const tempoFormatado =
-      String(minutos).padStart(2, "0") +
-      ":" +
-      String(segundosRestantes).padStart(2, "0");
+      const tempoSegundos =
+        Number(dados.tempo_segundos ?? 0);
 
-    document.getElementById("resultadoAcertos").textContent = acertos;
-    document.getElementById("resultadoTotal").textContent = total;
-    document.getElementById("resultadoTempo").textContent = tempoFormatado;
+      resultadoAcertos.textContent =
+        acertos;
 
-    trocarTela(
-      telaProva,
-      telaFinal
-    );
+      resultadoTotal.textContent =
+        total;
+
+      resultadoTempo.textContent =
+        formatarTempo(tempoSegundos);
+
+      if (acertos === total) {
+
+        resultadoMensagem.textContent =
+          "🎉 Parabéns! Você acertou todas!";
+
+      }
+
+      else if (acertos >= Math.ceil(total * 0.7)) {
+
+        resultadoMensagem.textContent =
+          "👏 Muito bem! Ótimo resultado!";
+
+      }
+
+      else {
+
+        resultadoMensagem.textContent =
+          "👏 Desafio concluído!";
+
+      }
+
+      trocarTela(
+        telaProva,
+        telaFinal
+      );
+
+    }
+
+    catch (erro) {
+
+      salvandoResposta = false;
+
+      mostrarErro(
+        "erroProva",
+        erro.message
+      );
+
+    }
 
   }
 
-  catch (erro) {
 
-    mostrarErro(
-      "erroProva",
-      erro.message
-    );
-
-  }
-
-}
-
-
-  /* ============================================
-     CRONÔMETRO VISUAL
-     ============================================ */
+  /* =====================================================
+     CRONÔMETRO
+     ===================================================== */
 
   function iniciarCronometro() {
 
@@ -901,6 +1019,7 @@
     timer = setInterval(() => {
 
       segundos++;
+
       atualizarCronometro();
 
     }, 1000);
@@ -910,28 +1029,50 @@
 
   function atualizarCronometro() {
 
-    const minutos =
-      Math.floor(segundos / 60);
-
-    const resto =
-      segundos % 60;
-
     cronometro.textContent =
-      String(minutos).padStart(2, "0")
-      + ":"
-      + String(resto).padStart(2, "0");
+      formatarTempo(segundos);
 
   }
 
 
-  /* ============================================
-     TELAS
-     ============================================ */
+  function formatarTempo(totalSegundos) {
+
+    const valor =
+      Math.max(
+        0,
+        Math.floor(Number(totalSegundos) || 0)
+      );
+
+    const minutos =
+      Math.floor(valor / 60);
+
+    const segundosRestantes =
+      valor % 60;
+
+    return (
+      String(minutos).padStart(2, "0")
+      +
+      ":"
+      +
+      String(segundosRestantes).padStart(2, "0")
+    );
+
+  }
+
+
+  /* =====================================================
+     TROCAR TELAS
+     ===================================================== */
 
   function trocarTela(anterior, proxima) {
 
-    anterior.classList.add("oculto");
-    proxima.classList.remove("oculto");
+    anterior.classList.add(
+      "oculto"
+    );
+
+    proxima.classList.remove(
+      "oculto"
+    );
 
     window.scrollTo({
       top: 0,
@@ -941,17 +1082,20 @@
   }
 
 
-  /* ============================================
-     MENSAGENS
-     ============================================ */
+  /* =====================================================
+     MENSAGENS DE ERRO
+     ===================================================== */
 
   function mostrarErro(id, mensagem) {
 
     const elemento =
       document.getElementById(id);
 
-    elemento.textContent = mensagem;
-    elemento.style.display = "block";
+    elemento.textContent =
+      mensagem;
+
+    elemento.style.display =
+      "block";
 
   }
 
@@ -961,8 +1105,11 @@
     const elemento =
       document.getElementById(id);
 
-    elemento.textContent = "";
-    elemento.style.display = "none";
+    elemento.textContent =
+      "";
+
+    elemento.style.display =
+      "none";
 
   }
 

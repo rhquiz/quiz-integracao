@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Ranking | Desafio da Integração</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at top right, rgba(255,255,255,.08), transparent 35%),
+        linear-gradient(135deg, #171717, #292929);
+      color: #222;
+      padding: 32px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 1250px;
+      margin: 0 auto;
+    }
+
+    .cabecalho {
+      text-align: center;
+      color: white;
+      margin-bottom: 35px;
+    }
+
+    .trofeu {
+      font-size: 60px;
+      margin-bottom: 8px;
+    }
+
+    h1 {
+      font-size: 42px;
+      margin-bottom: 8px;
+    }
+
+    .subtitulo {
+      color: #d4d4d4;
+      font-size: 18px;
+    }
+
+    .status {
+      margin-top: 14px;
+      color: #cfcfcf;
+      font-size: 14px;
+    }
+
+    .status span {
+      display: inline-block;
+      width: 9px;
+      height: 9px;
+      background: #76a96b;
+      border-radius: 50%;
+      margin-right: 6px;
+    }
+
+    .podio {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+      align-items: end;
+      margin-bottom: 28px;
+    }
+
+    .podio-card {
+      background: #f4f0e7;
+      border-radius: 22px;
+      padding: 25px 20px;
+      text-align: center;
+      box-shadow: 0 15px 35px rgba(0,0,0,.25);
+    }
+
+    .primeiro {
+      min-height: 255px;
+      border: 3px solid #d4af37;
+    }
+
+    .segundo {
+      min-height: 220px;
+    }
+
+    .terceiro {
+      min-height: 205px;
+    }
+
+    .medalha {
+      font-size: 48px;
+      margin-bottom: 10px;
+    }
+
+    .posicao {
+      color: #777;
+      font-size: 14px;
+      font-weight: bold;
+      text-transform: uppercase;
+    }
+
+    .nome {
+      font-size: 24px;
+      font-weight: bold;
+      margin: 10px 0 16px;
+      word-break: break-word;
+    }
+
+    .dados {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .dado {
+      background: #e8e1d4;
+      border-radius: 10px;
+      padding: 10px 13px;
+      font-weight: bold;
+    }
+
+    .lista {
+      background: #f4f0e7;
+      border-radius: 22px;
+      overflow: hidden;
+      box-shadow: 0 15px 35px rgba(0,0,0,.25);
+    }
+
+    .lista-titulo {
+      padding: 20px 25px;
+      font-size: 20px;
+      font-weight: bold;
+      border-bottom: 1px solid #ddd5c7;
+    }
+
+    .linha {
+      display: grid;
+      grid-template-columns: 80px 1fr 160px 160px;
+      align-items: center;
+      gap: 15px;
+      padding: 17px 25px;
+      border-bottom: 1px solid #e1dace;
+    }
+
+    .linha:last-child {
+      border-bottom: 0;
+    }
+
+    .numero {
+      font-size: 20px;
+      font-weight: bold;
+    }
+
+    .participante {
+      font-size: 18px;
+      font-weight: bold;
+    }
+
+    .pontuacao,
+    .tempo {
+      text-align: center;
+      font-weight: bold;
+    }
+
+    .vazio {
+      padding: 45px 20px;
+      text-align: center;
+      color: #777;
+    }
+
+    .erro {
+      background: #f8dddd;
+      color: #8b2020;
+      border-radius: 12px;
+      padding: 15px;
+      margin-bottom: 20px;
+      text-align: center;
+      display: none;
+    }
+
+    @media (max-width: 800px) {
+      body {
+        padding: 18px;
+      }
+
+      h1 {
+        font-size: 30px;
+      }
+
+      .podio {
+        grid-template-columns: 1fr;
+      }
+
+      .primeiro,
+      .segundo,
+      .terceiro {
+        min-height: auto;
+      }
+
+      .linha {
+        grid-template-columns: 55px 1fr;
+      }
+
+      .pontuacao,
+      .tempo {
+        text-align: left;
+        font-size: 14px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <div class="cabecalho">
+
+    <div class="trofeu">🏆</div>
+
+    <h1>Ranking da Integração</h1>
+
+    <p class="subtitulo">
+      Quem conhece mais e responde mais rápido chega ao topo!
+    </p>
+
+    <div class="status">
+      <span></span>
+      Ranking atualizado automaticamente
+    </div>
+
+  </div>
+
+  <div id="erro" class="erro"></div>
+
+  <div id="podio" class="podio"></div>
+
+  <div class="lista">
+
+    <div class="lista-titulo">
+      🏁 Classificação
+    </div>
+
+    <div id="rankingLista">
+
+      <div class="vazio">
+        Aguardando os primeiros participantes...
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+<script type="module">
+
+  /* =========================================
+     COLOQUE OS MESMOS DADOS DO INDEX.HTML
+     ========================================= */
+
+  const SUPABASE_URL =
+    "https://tkyhrxvdpgslmwxokksi.supabase.co";
+
+  const SUPABASE_KEY =
+    "sb_publishable__bW5UZyxprdo5vfMPQLr3A_ddfUMVtO";
+
+
+  const podio =
+    document.getElementById("podio");
+
+  const rankingLista =
+    document.getElementById("rankingLista");
+
+  const erro =
+    document.getElementById("erro");
+
+
+  async function rpc(funcao, parametros = {}) {
+
+    const resposta = await fetch(
+      `${SUPABASE_URL}/rest/v1/rpc/${funcao}`,
+      {
+        method: "POST",
+
+        headers: {
+          "Content-Type": "application/json",
+          "apikey": SUPABASE_KEY,
+          "Authorization": `Bearer ${SUPABASE_KEY}`
+        },
+
+        body: JSON.stringify(parametros)
+      }
+    );
+
+    const texto =
+      await resposta.text();
+
+    let dados = null;
+
+    if (texto) {
+      try {
+        dados = JSON.parse(texto);
+      }
+      catch {
+        dados = texto;
+      }
+    }
+
+    if (!resposta.ok) {
+
+      const mensagem =
+        dados?.message ||
+        dados?.error ||
+        "Não foi possível carregar o ranking.";
+
+      throw new Error(mensagem);
+    }
+
+    return dados;
+  }
+
+
+  function formatarTempo(totalSegundos) {
+
+    const valor =
+      Math.max(
+        0,
+        Math.floor(Number(totalSegundos) || 0)
+      );
+
+    const minutos =
+      Math.floor(valor / 60);
+
+    const segundos =
+      valor % 60;
+
+    return (
+      String(minutos).padStart(2, "0")
+      +
+      ":"
+      +
+      String(segundos).padStart(2, "0")
+    );
+  }
+
+
+  function criarPodio(dados) {
+
+    podio.innerHTML = "";
+
+    if (!dados.length) {
+      return;
+    }
+
+    /*
+      No telão vamos mostrar visualmente:
+      2º | 1º | 3º
+    */
+
+    const ordemVisual = [];
+
+    if (dados[1]) {
+      ordemVisual.push({
+        pessoa: dados[1],
+        classe: "segundo",
+        medalha: "🥈",
+        texto: "2º lugar"
+      });
+    }
+
+    if (dados[0]) {
+      ordemVisual.push({
+        pessoa: dados[0],
+        classe: "primeiro",
+        medalha: "🥇",
+        texto: "1º lugar"
+      });
+    }
+
+    if (dados[2]) {
+      ordemVisual.push({
+        pessoa: dados[2],
+        classe: "terceiro",
+        medalha: "🥉",
+        texto: "3º lugar"
+      });
+    }
+
+    ordemVisual.forEach(item => {
+
+      const card =
+        document.createElement("div");
+
+      card.className =
+        `podio-card ${item.classe}`;
+
+      const medalha =
+        document.createElement("div");
+
+      medalha.className = "medalha";
+      medalha.textContent = item.medalha;
+
+      const posicao =
+        document.createElement("div");
+
+      posicao.className = "posicao";
+      posicao.textContent = item.texto;
+
+      const nome =
+        document.createElement("div");
+
+      nome.className = "nome";
+      nome.textContent =
+        item.pessoa.nome || "Participante";
+
+      const dadosDiv =
+        document.createElement("div");
+
+      dadosDiv.className = "dados";
+
+      const pontos =
+        document.createElement("div");
+
+      pontos.className = "dado";
+      pontos.textContent =
+        `🎯 ${item.pessoa.total_acertos}/11`;
+
+      const tempo =
+        document.createElement("div");
+
+      tempo.className = "dado";
+      tempo.textContent =
+        `⏱️ ${formatarTempo(item.pessoa.tempo_segundos)}`;
+
+      dadosDiv.appendChild(pontos);
+      dadosDiv.appendChild(tempo);
+
+      card.appendChild(medalha);
+      card.appendChild(posicao);
+      card.appendChild(nome);
+      card.appendChild(dadosDiv);
+
+      podio.appendChild(card);
+
+    });
+  }
+
+
+  function criarLista(dados) {
+
+    rankingLista.innerHTML = "";
+
+    if (!dados.length) {
+
+      rankingLista.innerHTML =
+        `<div class="vazio">
+          Aguardando os primeiros participantes...
+        </div>`;
+
+      return;
+    }
+
+    dados.forEach((pessoa, indice) => {
+
+      const linha =
+        document.createElement("div");
+
+      linha.className = "linha";
+
+      const numero =
+        document.createElement("div");
+
+      numero.className = "numero";
+
+      numero.textContent =
+        `${pessoa.posicao ?? indice + 1}º`;
+
+      const participante =
+        document.createElement("div");
+
+      participante.className =
+        "participante";
+
+      participante.textContent =
+        pessoa.nome || "Participante";
+
+      const pontuacao =
+        document.createElement("div");
+
+      pontuacao.className =
+        "pontuacao";
+
+      pontuacao.textContent =
+        `🎯 ${pessoa.total_acertos}/11`;
+
+      const tempo =
+        document.createElement("div");
+
+      tempo.className =
+        "tempo";
+
+      tempo.textContent =
+        `⏱️ ${formatarTempo(pessoa.tempo_segundos)}`;
+
+      linha.appendChild(numero);
+      linha.appendChild(participante);
+      linha.appendChild(pontuacao);
+      linha.appendChild(tempo);
+
+      rankingLista.appendChild(linha);
+
+    });
+  }
+
+
+  async function carregarRanking() {
+
+    try {
+
+      erro.style.display = "none";
+
+      const dados =
+        await rpc("ranking_quiz");
+
+      const ranking =
+        Array.isArray(dados)
+          ? dados
+          : [];
+
+      criarPodio(ranking);
+      criarLista(ranking);
+
+    }
+
+    catch (e) {
+
+      erro.textContent =
+        "Erro ao atualizar ranking: " + e.message;
+
+      erro.style.display =
+        "block";
+
+    }
+  }
+
+
+  /*
+    Atualiza imediatamente ao abrir
+  */
+
+  carregarRanking();
+
+
+  /*
+    Atualiza o telão a cada 2 segundos
+  */
+
+  setInterval(
+    carregarRanking,
+    2000
+  );
+
+</script>
+
+</body>
+</html>

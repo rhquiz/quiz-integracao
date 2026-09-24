@@ -373,23 +373,38 @@
   </section>
 
 
-  <!-- TELA FINAL -->
-  <section id="telaFinal" class="card final oculto">
+ <!-- TELA FINAL -->
+<section id="telaFinal" class="card final oculto">
 
-    <div class="trofeu">🏆</div>
+  <div class="trofeu">🏆</div>
 
-    <h2>Desafio concluído!</h2>
+  <h2>Desafio concluído!</h2>
 
-    <p>
-      Suas respostas foram registradas com sucesso.
-    </p>
+  <p>Você acertou</p>
 
-    <p>
-      Agora acompanhe o <strong>ranking no telão</strong>
-      e descubra quem conquistou o primeiro lugar!
-    </p>
+  <div style="
+    font-size: 52px;
+    font-weight: bold;
+    color: #222;
+    margin: 12px 0 5px;
+  ">
+    <span id="resultadoAcertos">0</span>
+    /
+    <span id="resultadoTotal">11</span>
+  </div>
 
-  </section>
+  <p>respostas corretas</p>
+
+  <div style="
+    background: #ebe5d9;
+    border-radius: 14px;
+    padding: 15px;
+    margin: 22px 0;
+    font-size: 20px;
+  ">
+    ⏱️ Tempo:
+    <strong id="resultadoTempo">00:00</strong>
+  </
 
 </div>
 
@@ -825,34 +840,52 @@
 
   async function finalizar() {
 
-    try {
+  try {
 
-      await rpc(
-        "finalizar_prova",
-        {
-          p_tentativa_id: tentativaId
-        }
-      );
+    const resultado = await rpc(
+      "finalizar_prova",
+      {
+        p_tentativa_id: tentativaId
+      }
+    );
 
-      clearInterval(timer);
+    clearInterval(timer);
 
-      trocarTela(
-        telaProva,
-        telaFinal
-      );
+    const dados = resultado[0];
 
-    }
+    const acertos = dados.total_acertos;
+    const total = dados.total_perguntas;
+    const tempoSegundos = dados.tempo_segundos;
 
-    catch (erro) {
+    const minutos = Math.floor(tempoSegundos / 60);
+    const segundosRestantes = tempoSegundos % 60;
 
-      mostrarErro(
-        "erroProva",
-        erro.message
-      );
+    const tempoFormatado =
+      String(minutos).padStart(2, "0") +
+      ":" +
+      String(segundosRestantes).padStart(2, "0");
 
-    }
+    document.getElementById("resultadoAcertos").textContent = acertos;
+    document.getElementById("resultadoTotal").textContent = total;
+    document.getElementById("resultadoTempo").textContent = tempoFormatado;
+
+    trocarTela(
+      telaProva,
+      telaFinal
+    );
 
   }
+
+  catch (erro) {
+
+    mostrarErro(
+      "erroProva",
+      erro.message
+    );
+
+  }
+
+}
 
 
   /* ============================================

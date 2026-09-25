@@ -122,6 +122,7 @@
       color: #777;
       font-size: 13px;
       text-align: center;
+      line-height: 1.5;
     }
 
     .erro {
@@ -263,10 +264,32 @@
       font-size: 20px;
     }
 
-    .resultado-mensagem {
+    .resultado-status {
       margin-top: 20px;
+      border-radius: 14px;
+      padding: 18px;
+    }
+
+    .resultado-status.aprovado {
+      background: #e1efdd;
+      border: 2px solid #83a87a;
+    }
+
+    .resultado-status.reprovado {
+      background: #f6dddd;
+      border: 2px solid #c77b7b;
+    }
+
+    .resultado-mensagem {
+      margin: 0 !important;
+      font-size: 21px;
       font-weight: bold;
       color: #222 !important;
+    }
+
+    .resultado-orientacao {
+      margin-top: 10px !important;
+      font-size: 15px;
     }
 
     @media (max-width: 600px) {
@@ -330,7 +353,9 @@
     </button>
 
     <p class="aviso">
-      Você terá apenas uma participação. Boa sorte!
+      É necessário acertar pelo menos
+      <strong>9 das 11 questões</strong>
+      para ser aprovado. Boa sorte!
     </p>
 
   </section>
@@ -349,6 +374,7 @@
 
     <div class="info">
       📝 <strong>11 perguntas</strong><br>
+      ✅ <strong>9 acertos para aprovação</strong><br>
       ⏱️ O tempo começa ao iniciar<br>
       🏆 Mais acertos = melhor posição<br>
       ⚡ Em caso de empate, vence o menor tempo
@@ -399,9 +425,9 @@
   <!-- TELA FINAL -->
   <section id="telaFinal" class="card final oculto">
 
-    <div class="trofeu">🏆</div>
+    <div id="iconeResultado" class="trofeu">🏆</div>
 
-    <h2>Desafio concluído!</h2>
+    <h2 id="tituloResultado">Desafio concluído!</h2>
 
     <p>Você acertou</p>
 
@@ -418,14 +444,15 @@
       <strong id="resultadoTempo">00:00</strong>
     </div>
 
-    <p id="resultadoMensagem" class="resultado-mensagem">
-      Resultado registrado!
-    </p>
+    <div id="resultadoStatus" class="resultado-status">
 
-    <p>
-      Acompanhe sua posição no
-      <strong>ranking no telão!</strong>
-    </p>
+      <p id="resultadoMensagem" class="resultado-mensagem">
+        Resultado registrado!
+      </p>
+
+      <p id="resultadoOrientacao" class="resultado-orientacao"></p>
+
+    </div>
 
   </section>
 
@@ -442,7 +469,7 @@
     "https://tkyhrxvdpgslmwxokksi.supabase.co";
 
   const SUPABASE_KEY =
-    "sb_publishable__bW5UZyxprdo5vfMPQLr3A_ddfUMVtO";
+    "COLE_SUA_CHAVE_PUBLICA_AQUI";
 
 
   /* =====================================================
@@ -502,6 +529,18 @@
 
   const resultadoMensagem =
     document.getElementById("resultadoMensagem");
+
+  const resultadoOrientacao =
+    document.getElementById("resultadoOrientacao");
+
+  const resultadoStatus =
+    document.getElementById("resultadoStatus");
+
+  const tituloResultado =
+    document.getElementById("tituloResultado");
+
+  const iconeResultado =
+    document.getElementById("iconeResultado");
 
 
   /* =====================================================
@@ -642,11 +681,19 @@
 
       const participante = resultado[0];
 
+      /*
+        O banco é quem deve informar se a pessoa
+        está definitivamente bloqueada/aprovada.
+
+        A função identificar_participante será ajustada
+        para considerar aprovado somente quem atingiu 9 ou mais.
+      */
+
       if (participante.ja_participou) {
 
         mostrarErro(
           "erroEntrada",
-          "Este CPF já participou do desafio."
+          "Você já foi aprovado neste desafio."
         );
 
         return;
@@ -709,9 +756,11 @@
       );
 
       if (!inicio || inicio.length === 0) {
+
         throw new Error(
           "Não foi possível iniciar o desafio."
         );
+
       }
 
       tentativaId =
@@ -917,6 +966,7 @@
 
   /* =====================================================
      FINALIZAR PROVA
+     REGRA: 9 OU MAIS = APROVADO
      ===================================================== */
 
   async function finalizar() {
@@ -964,26 +1014,64 @@
       resultadoTempo.textContent =
         formatarTempo(tempoSegundos);
 
-      if (acertos === total) {
+
+      /*
+      =============================================
+      APROVAÇÃO
+      =============================================
+      */
+
+      if (acertos >= 9) {
+
+        iconeResultado.textContent =
+          "✅";
+
+        tituloResultado.textContent =
+          "APROVADO!";
+
+        resultadoStatus.className =
+          "resultado-status aprovado";
 
         resultadoMensagem.textContent =
-          "🎉 Parabéns! Você acertou todas!";
+          "🎉 Parabéns! Você foi aprovado!";
+
+        resultadoOrientacao.innerHTML =
+          "Você atingiu a pontuação mínima de " +
+          "<strong>9 acertos</strong>.<br><br>" +
+          "🏆 Acompanhe sua posição no " +
+          "<strong>ranking no telão!</strong>";
 
       }
 
-      else if (acertos >= Math.ceil(total * 0.7)) {
 
-        resultadoMensagem.textContent =
-          "👏 Muito bem! Ótimo resultado!";
-
-      }
+      /*
+      =============================================
+      NÃO APROVADO
+      =============================================
+      */
 
       else {
 
+        iconeResultado.textContent =
+          "❌";
+
+        tituloResultado.textContent =
+          "NÃO APROVADO";
+
+        resultadoStatus.className =
+          "resultado-status reprovado";
+
         resultadoMensagem.textContent =
-          "👏 Desafio concluído!";
+          "Você ainda não atingiu a pontuação necessária.";
+
+        resultadoOrientacao.innerHTML =
+          "É necessário acertar pelo menos " +
+          "<strong>9 das 11 questões</strong>.<br><br>" +
+          "🔄 Você deverá " +
+          "<strong>refazer o desafio</strong>.";
 
       }
+
 
       trocarTela(
         telaProva,

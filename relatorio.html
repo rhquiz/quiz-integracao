@@ -6,6 +6,9 @@
 
 <title>Relatório da Integração</title>
 
+<!-- Biblioteca para gerar Excel XLSX -->
+<script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
+
 <style>
 *{
   box-sizing:border-box;
@@ -64,15 +67,19 @@ body{
   line-height:1.5;
 }
 
+/* =========================
+   CAMPOS E BOTÕES
+========================= */
+
 .grid-busca{
   display:grid;
-  grid-template-columns:1fr auto;
+  grid-template-columns:1fr auto auto;
   gap:12px;
 }
 
 .grid-periodo{
   display:grid;
-  grid-template-columns:1fr 1fr auto;
+  grid-template-columns:1fr 1fr auto auto;
   gap:12px;
   align-items:end;
 }
@@ -119,6 +126,15 @@ button:disabled{
   cursor:not-allowed;
 }
 
+.btn-limpar{
+  background:#d8d0c2;
+  color:#222;
+}
+
+.btn-limpar:hover{
+  background:#c8beae;
+}
+
 .btn-excel{
   background:#556b4f;
 }
@@ -126,6 +142,10 @@ button:disabled{
 .btn-excel:hover{
   background:#465a41;
 }
+
+/* =========================
+   MENSAGENS
+========================= */
 
 .mensagem{
   padding:14px;
@@ -144,19 +164,9 @@ button:disabled{
   color:#444;
 }
 
-.resumo{
-  display:flex;
-  gap:15px;
-  flex-wrap:wrap;
-  margin:22px 0 15px;
-}
-
-.resumo-item{
-  background:#e9e3d7;
-  padding:13px 18px;
-  border-radius:12px;
-  font-weight:bold;
-}
+/* =========================
+   HISTÓRICO
+========================= */
 
 .tentativa{
   border:2px solid #ddd5c7;
@@ -227,6 +237,26 @@ button:disabled{
   color:#8b2929;
 }
 
+/* =========================
+   RELATÓRIO
+========================= */
+
+.acoes-relatorio{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:15px;
+  flex-wrap:wrap;
+  margin-top:22px;
+}
+
+.resumo-item{
+  background:#e9e3d7;
+  padding:13px 18px;
+  border-radius:12px;
+  font-weight:bold;
+}
+
 .tabela-container{
   overflow-x:auto;
   margin-top:20px;
@@ -235,7 +265,7 @@ button:disabled{
 table{
   width:100%;
   border-collapse:collapse;
-  min-width:1050px;
+  min-width:1150px;
   background:white;
   border-radius:12px;
   overflow:hidden;
@@ -265,20 +295,12 @@ td.errado{
   font-weight:bold;
 }
 
-.acoes-relatorio{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  gap:15px;
-  flex-wrap:wrap;
-  margin-top:20px;
-}
-
 .oculto{
   display:none !important;
 }
 
-@media(max-width:800px){
+@media(max-width:850px){
+
   .grid-busca,
   .grid-periodo{
     grid-template-columns:1fr;
@@ -309,20 +331,27 @@ td.errado{
 
   <div class="topo">
     <div class="icone">📋</div>
+
     <h1>Relatório da Integração</h1>
-    <p>Consulta de resultados e emissão da lista de aprovados</p>
+
+    <p>
+      Consulta de resultados e emissão da lista de aprovados
+    </p>
   </div>
 
 
-  <!-- CONSULTA INDIVIDUAL -->
+  <!-- ==========================================
+       CONSULTA INDIVIDUAL
+  =========================================== -->
 
   <section class="card">
 
     <h2>🔎 Consultar colaborador</h2>
 
     <p class="descricao">
-      Pesquise pelo nome para consultar todas as tentativas realizadas
-      e verificar as questões que o colaborador acertou ou errou.
+      Pesquise pelo nome para consultar todas as tentativas
+      realizadas e verificar as questões que o colaborador
+      acertou ou errou.
     </p>
 
     <div class="grid-busca">
@@ -338,69 +367,126 @@ td.errado{
         PESQUISAR
       </button>
 
+      <button
+        id="btnLimparPesquisa"
+        class="btn-limpar"
+      >
+        🧹 LIMPAR
+      </button>
+
     </div>
 
-    <div id="erroPesquisa" class="mensagem erro"></div>
+    <div
+      id="erroPesquisa"
+      class="mensagem erro"
+    ></div>
 
     <div id="resultadoPesquisa"></div>
 
   </section>
 
 
-  <!-- RELATÓRIO POR PERÍODO -->
+  <!-- ==========================================
+       RELATÓRIO POR PERÍODO
+  =========================================== -->
 
   <section class="card">
 
     <h2>📅 Lista de aprovados por período</h2>
 
     <p class="descricao">
-      Selecione uma data ou período para consultar os colaboradores
-      aprovados e gerar a lista da integração.
+      Selecione uma data ou período para consultar os
+      colaboradores aprovados e gerar a lista da integração.
     </p>
 
     <div class="grid-periodo">
 
       <div>
-        <label for="dataInicio">Data inicial</label>
-        <input type="date" id="dataInicio">
+
+        <label for="dataInicio">
+          Data inicial
+        </label>
+
+        <input
+          type="date"
+          id="dataInicio"
+        >
+
       </div>
 
+
       <div>
-        <label for="dataFim">Data final</label>
-        <input type="date" id="dataFim">
+
+        <label for="dataFim">
+          Data final
+        </label>
+
+        <input
+          type="date"
+          id="dataFim"
+        >
+
       </div>
+
 
       <button id="btnBuscarPeriodo">
         🔎 BUSCAR
       </button>
 
+
+      <button
+        id="btnLimparPeriodo"
+        class="btn-limpar"
+      >
+        🧹 LIMPAR
+      </button>
+
     </div>
 
-    <div id="erroPeriodo" class="mensagem erro"></div>
 
-    <div id="areaRelatorio" class="oculto">
+    <div
+      id="erroPeriodo"
+      class="mensagem erro"
+    ></div>
+
+
+    <div
+      id="areaRelatorio"
+      class="oculto"
+    >
 
       <div class="acoes-relatorio">
 
-        <div id="quantidade" class="resumo-item"></div>
+        <div
+          id="quantidade"
+          class="resumo-item"
+        ></div>
 
-        <button id="btnExcel" class="btn-excel">
+
+        <button
+          id="btnExcel"
+          class="btn-excel"
+        >
           📥 BAIXAR EXCEL
         </button>
 
       </div>
+
 
       <div class="tabela-container">
 
         <table>
 
           <thead>
+
             <tr>
+
               <th>Nome</th>
               <th>CPF</th>
               <th>Data da prova</th>
               <th>Nota</th>
               <th>Resultado</th>
+
               <th>Q1</th>
               <th>Q2</th>
               <th>Q3</th>
@@ -412,7 +498,9 @@ td.errado{
               <th>Q9</th>
               <th>Q10</th>
               <th>Q11</th>
+
             </tr>
+
           </thead>
 
           <tbody id="corpoRelatorio"></tbody>
@@ -430,8 +518,12 @@ td.errado{
 
 <script>
 
+/* =====================================================
+   CONFIGURAÇÃO SUPABASE
+===================================================== */
+
 const SUPABASE_URL =
- "https://tkyhrxvdpgslmwxokksi.supabase.co";
+   "https://tkyhrxvdpgslmwxokksi.supabase.co";
 
 const SUPABASE_KEY =
   "sb_publishable__bW5UZyxprdo5vfMPQLr3A_ddfUMVtO";
@@ -461,18 +553,26 @@ async function rpc(funcao,parametros={}){
     }
   );
 
-  const texto = await resposta.text();
 
-  let dados = null;
+  const texto =
+    await resposta.text();
+
+
+  let dados=null;
+
 
   if(texto){
+
     try{
       dados=JSON.parse(texto);
     }
+
     catch{
       dados=texto;
     }
+
   }
+
 
   if(!resposta.ok){
 
@@ -484,16 +584,20 @@ async function rpc(funcao,parametros={}){
 
   }
 
+
   return dados;
 }
 
 
 /* =====================================================
-   PESQUISAR COLABORADOR
+   CONSULTA POR NOME
 ===================================================== */
 
 const btnPesquisar =
   document.getElementById("btnPesquisar");
+
+const btnLimparPesquisa =
+  document.getElementById("btnLimparPesquisa");
 
 const nomePesquisa =
   document.getElementById("nomePesquisa");
@@ -511,9 +615,29 @@ btnPesquisar.addEventListener(
 nomePesquisa.addEventListener(
   "keydown",
   e=>{
+
     if(e.key==="Enter"){
       pesquisarColaborador();
     }
+
+  }
+);
+
+
+/* BOTÃO LIMPAR PESQUISA */
+
+btnLimparPesquisa.addEventListener(
+  "click",
+  ()=>{
+
+    nomePesquisa.value="";
+
+    resultadoPesquisa.innerHTML="";
+
+    esconderMensagem("erroPesquisa");
+
+    nomePesquisa.focus();
+
   }
 );
 
@@ -522,10 +646,12 @@ async function pesquisarColaborador(){
 
   esconderMensagem("erroPesquisa");
 
+  resultadoPesquisa.innerHTML="";
+
+
   const nome =
     nomePesquisa.value.trim();
 
-  resultadoPesquisa.innerHTML="";
 
   if(nome.length < 2){
 
@@ -537,22 +663,32 @@ async function pesquisarColaborador(){
     return;
   }
 
+
   btnPesquisar.disabled=true;
-  btnPesquisar.textContent="PESQUISANDO...";
+
+  btnPesquisar.textContent=
+    "PESQUISANDO...";
+
 
   try{
 
-    const dados = await rpc(
-      "consultar_historico_colaborador",
-      {
-        p_nome:nome
-      }
-    );
+    const dados =
+      await rpc(
+        "consultar_historico_colaborador",
+        {
+          p_nome:nome
+        }
+      );
+
 
     if(!dados || dados.length===0){
 
       resultadoPesquisa.innerHTML=`
-        <div class="mensagem info" style="display:block">
+
+        <div
+          class="mensagem info"
+          style="display:block"
+        >
           Nenhum resultado encontrado para esse nome.
         </div>
       `;
@@ -560,9 +696,11 @@ async function pesquisarColaborador(){
       return;
     }
 
+
     montarHistorico(dados);
 
   }
+
   catch(erro){
 
     mostrarMensagem(
@@ -571,10 +709,13 @@ async function pesquisarColaborador(){
     );
 
   }
+
   finally{
 
     btnPesquisar.disabled=false;
-    btnPesquisar.textContent="PESQUISAR";
+
+    btnPesquisar.textContent=
+      "PESQUISAR";
 
   }
 
@@ -582,48 +723,63 @@ async function pesquisarColaborador(){
 
 
 /* =====================================================
-   HISTÓRICO
+   MONTAR HISTÓRICO
 ===================================================== */
 
 function montarHistorico(dados){
 
   resultadoPesquisa.innerHTML="";
 
+
   dados.forEach(item=>{
 
     const aprovado =
       Number(item.nota)>=9;
 
+
     const cpf =
       mascararCPF(item.cpf);
+
 
     const data =
       formatarDataHora(item.data_prova);
 
+
     let questoes="";
+
 
     for(let i=1;i<=11;i++){
 
       const valor =
         item[`questao_${i}`] || "-";
 
+
       const classe =
         valor==="ACERTOU"
         ? "acertou"
         : "errou";
+
 
       const icone =
         valor==="ACERTOU"
         ? "✅"
         : "❌";
 
+
       questoes += `
+
         <div class="questao ${classe}">
-          Q${i} — ${icone} ${valor}
+
+          Q${i}
+          —
+          ${icone}
+          ${valor}
+
         </div>
       `;
 
     }
+
 
     resultadoPesquisa.innerHTML += `
 
@@ -637,20 +793,48 @@ function montarHistorico(dados){
               ${escaparHTML(item.nome)}
             </div>
 
+
             <div class="dados">
-              ${escaparHTML(item.setor || "-")}<br>
-              CPF: ${cpf}<br>
-              ${item.numero_tentativa}ª tentativa • ${data}<br>
-              Nota: <strong>${item.nota}/11</strong>
+
+              ${escaparHTML(item.setor || "-")}
+              <br>
+
+              CPF:
+              ${cpf}
+              <br>
+
+              ${item.numero_tentativa}ª tentativa
+              •
+              ${data}
+              <br>
+
+              Nota:
+              <strong>
+                ${item.nota} de 11
+              </strong>
+
             </div>
 
           </div>
 
-          <div class="status ${aprovado ? "aprovado" : "reprovado"}">
-            ${aprovado ? "✅ APROVADO" : "❌ NÃO APROVADO"}
+
+          <div
+            class="
+              status
+              ${aprovado ? "aprovado" : "reprovado"}
+            "
+          >
+
+            ${
+              aprovado
+              ? "✅ APROVADO"
+              : "❌ NÃO APROVADO"
+            }
+
           </div>
 
         </div>
+
 
         <div class="questoes">
           ${questoes}
@@ -670,6 +854,9 @@ function montarHistorico(dados){
 
 const btnBuscarPeriodo =
   document.getElementById("btnBuscarPeriodo");
+
+const btnLimparPeriodo =
+  document.getElementById("btnLimparPeriodo");
 
 const dataInicio =
   document.getElementById("dataInicio");
@@ -693,11 +880,41 @@ btnBuscarPeriodo.addEventListener(
 );
 
 
+/* BOTÃO LIMPAR PERÍODO */
+
+btnLimparPeriodo.addEventListener(
+  "click",
+  ()=>{
+
+    dataInicio.value="";
+    dataFim.value="";
+
+    dadosRelatorio=[];
+
+    corpoRelatorio.innerHTML="";
+
+    quantidade.textContent="";
+
+    areaRelatorio.classList.add(
+      "oculto"
+    );
+
+    esconderMensagem(
+      "erroPeriodo"
+    );
+
+  }
+);
+
+
 async function buscarPeriodo(){
 
   esconderMensagem("erroPeriodo");
 
-  areaRelatorio.classList.add("oculto");
+  areaRelatorio.classList.add(
+    "oculto"
+  );
+
 
   if(!dataInicio.value || !dataFim.value){
 
@@ -709,6 +926,7 @@ async function buscarPeriodo(){
     return;
   }
 
+
   if(dataFim.value < dataInicio.value){
 
     mostrarMensagem(
@@ -719,22 +937,29 @@ async function buscarPeriodo(){
     return;
   }
 
+
   btnBuscarPeriodo.disabled=true;
-  btnBuscarPeriodo.textContent="BUSCANDO...";
+
+  btnBuscarPeriodo.textContent=
+    "BUSCANDO...";
+
 
   try{
 
-    dadosRelatorio = await rpc(
-      "relatorio_aprovados_integracao",
-      {
-        p_data_inicio:dataInicio.value,
-        p_data_fim:dataFim.value
-      }
-    );
+    dadosRelatorio =
+      await rpc(
+        "relatorio_aprovados_integracao",
+        {
+          p_data_inicio:dataInicio.value,
+          p_data_fim:dataFim.value
+        }
+      );
+
 
     montarTabela();
 
   }
+
   catch(erro){
 
     mostrarMensagem(
@@ -743,10 +968,13 @@ async function buscarPeriodo(){
     );
 
   }
+
   finally{
 
     btnBuscarPeriodo.disabled=false;
-    btnBuscarPeriodo.textContent="🔎 BUSCAR";
+
+    btnBuscarPeriodo.textContent=
+      "🔎 BUSCAR";
 
   }
 
@@ -754,46 +982,63 @@ async function buscarPeriodo(){
 
 
 /* =====================================================
-   TABELA
+   TABELA DO RELATÓRIO
 ===================================================== */
 
 function montarTabela(){
 
   corpoRelatorio.innerHTML="";
 
+
   quantidade.textContent =
     `${dadosRelatorio.length} aprovado(s) encontrado(s)`;
+
 
   if(dadosRelatorio.length===0){
 
     corpoRelatorio.innerHTML=`
+
       <tr>
+
         <td colspan="16">
-          Nenhum aprovado encontrado no período selecionado.
+
+          Nenhum aprovado encontrado
+          no período selecionado.
+
         </td>
+
       </tr>
     `;
 
-    areaRelatorio.classList.remove("oculto");
+
+    areaRelatorio.classList.remove(
+      "oculto"
+    );
+
 
     return;
   }
 
+
   dadosRelatorio.forEach(item=>{
 
     let questoes="";
+
 
     for(let i=1;i<=11;i++){
 
       const valor =
         item[`questao_${i}`] || "-";
 
+
       const classe =
         valor==="ACERTOU"
         ? "certo"
         : "errado";
 
+
       questoes += `
+
         <td class="${classe}">
           ${valor}
         </td>
@@ -801,20 +1046,33 @@ function montarTabela(){
 
     }
 
+
     corpoRelatorio.innerHTML += `
 
       <tr>
 
-        <td>${escaparHTML(item.nome)}</td>
-
-        <td>${mascararCPF(item.cpf)}</td>
-
-        <td>${formatarDataHora(item.data_prova)}</td>
-
-        <td><strong>${item.nota}/11</strong></td>
+        <td>
+          ${escaparHTML(item.nome)}
+        </td>
 
         <td>
-          <strong>APROVADO</strong>
+          ${mascararCPF(item.cpf)}
+        </td>
+
+        <td>
+          ${formatarDataHora(item.data_prova)}
+        </td>
+
+        <td>
+          <strong>
+            ${item.nota} de 11
+          </strong>
+        </td>
+
+        <td>
+          <strong>
+            APROVADO
+          </strong>
         </td>
 
         ${questoes}
@@ -824,13 +1082,16 @@ function montarTabela(){
 
   });
 
-  areaRelatorio.classList.remove("oculto");
+
+  areaRelatorio.classList.remove(
+    "oculto"
+  );
 
 }
 
 
 /* =====================================================
-   BAIXAR EXCEL
+   GERAR EXCEL XLSX
 ===================================================== */
 
 document
@@ -852,13 +1113,63 @@ function baixarExcel(){
     return;
   }
 
-  /*
-    O arquivo é gerado em formato CSV compatível
-    com Excel. Isso permite funcionar diretamente
-    no navegador sem instalar bibliotecas.
-  */
 
-  const cabecalho = [
+  if(typeof XLSX==="undefined"){
+
+    alert(
+      "Não foi possível carregar o gerador de Excel. Verifique sua conexão com a internet."
+    );
+
+    return;
+  }
+
+
+  /* ==========================================
+     DADOS DA PLANILHA
+  ========================================== */
+
+  const linhas=[];
+
+
+  /* TÍTULO */
+
+  linhas.push([
+    "RELATÓRIO DE INTEGRAÇÃO"
+  ]);
+
+
+  /* PERÍODO */
+
+  linhas.push([
+    "Período:",
+    `${formatarDataSimples(dataInicio.value)} a ${formatarDataSimples(dataFim.value)}`
+  ]);
+
+
+  /* TOTAL */
+
+  linhas.push([
+    "Total de aprovados:",
+    dadosRelatorio.length
+  ]);
+
+
+  /* DATA DE EMISSÃO */
+
+  linhas.push([
+    "Emitido em:",
+    new Date().toLocaleString("pt-BR")
+  ]);
+
+
+  /* LINHA VAZIA */
+
+  linhas.push([]);
+
+
+  /* CABEÇALHO */
+
+  linhas.push([
     "Nome",
     "CPF",
     "Data da prova",
@@ -875,23 +1186,26 @@ function baixarExcel(){
     "Questão 9",
     "Questão 10",
     "Questão 11"
-  ];
+  ]);
 
-  const linhas = [
-    cabecalho
-  ];
+
+  /* COLABORADORES */
 
   dadosRelatorio.forEach(item=>{
 
-    const linha = [
+    linhas.push([
 
       item.nome || "",
 
-      formatarCPFCompleto(item.cpf),
+      formatarCPFCompleto(
+        item.cpf
+      ),
 
-      formatarDataHora(item.data_prova),
+      formatarDataHora(
+        item.data_prova
+      ),
 
-      `${item.nota}/11`,
+      `${item.nota} de 11`,
 
       "APROVADO",
 
@@ -906,56 +1220,384 @@ function baixarExcel(){
       item.questao_9 || "",
       item.questao_10 || "",
       item.questao_11 || ""
-    ];
 
-    linhas.push(linha);
+    ]);
 
   });
 
 
-  const csv =
-    linhas
-      .map(linha =>
-        linha
-          .map(valor =>
-            `"${String(valor).replace(/"/g,'""')}"`
-          )
-          .join(";")
-      )
-      .join("\r\n");
+  /* ==========================================
+     CRIA PLANILHA
+  ========================================== */
 
-
-  const blob =
-    new Blob(
-      [
-        "\uFEFF",
-        csv
-      ],
-      {
-        type:
-          "text/csv;charset=utf-8;"
-      }
+  const ws =
+    XLSX.utils.aoa_to_sheet(
+      linhas
     );
 
 
-  const link =
-    document.createElement("a");
+  /* MESCLAR TÍTULO */
 
-  const url =
-    URL.createObjectURL(blob);
+  ws["!merges"]=[
+    {
+      s:{r:0,c:0},
+      e:{r:0,c:15}
+    }
+  ];
 
-  link.href=url;
 
-  link.download =
-    `Relatorio_Integracao_${dataInicio.value}_a_${dataFim.value}.csv`;
+  /* ==========================================
+     LARGURA DAS COLUNAS
+  ========================================== */
 
-  document.body.appendChild(link);
+  ws["!cols"]=[
 
-  link.click();
+    {wch:32},  /* Nome */
 
-  document.body.removeChild(link);
+    {wch:18},  /* CPF */
 
-  URL.revokeObjectURL(url);
+    {wch:21},  /* Data */
+
+    {wch:12},  /* Nota */
+
+    {wch:16},  /* Resultado */
+
+    {wch:14},
+    {wch:14},
+    {wch:14},
+    {wch:14},
+    {wch:14},
+    {wch:14},
+    {wch:14},
+    {wch:14},
+    {wch:14},
+    {wch:14},
+    {wch:14}
+
+  ];
+
+
+  /* ==========================================
+     ALTURA DAS LINHAS
+  ========================================== */
+
+  ws["!rows"]=[
+    {hpt:32},
+    {hpt:22},
+    {hpt:22},
+    {hpt:22},
+    {hpt:10},
+    {hpt:30}
+  ];
+
+
+  /* ==========================================
+     ESTILO DO TÍTULO
+  ========================================== */
+
+  if(ws["A1"]){
+
+    ws["A1"].s={
+
+      font:{
+        bold:true,
+        sz:18,
+        color:{
+          rgb:"FFFFFF"
+        }
+      },
+
+      fill:{
+        fgColor:{
+          rgb:"222222"
+        }
+      },
+
+      alignment:{
+        horizontal:"center",
+        vertical:"center"
+      }
+
+    };
+
+  }
+
+
+  /* ==========================================
+     INFORMAÇÕES DO TOPO
+  ========================================== */
+
+  for(let linha=1;linha<=3;linha++){
+
+    const celulaA =
+      ws[
+        XLSX.utils.encode_cell({
+          r:linha,
+          c:0
+        })
+      ];
+
+
+    if(celulaA){
+
+      celulaA.s={
+
+        font:{
+          bold:true
+        },
+
+        fill:{
+          fgColor:{
+            rgb:"E9E3D7"
+          }
+        }
+
+      };
+
+    }
+
+  }
+
+
+  /* ==========================================
+     CABEÇALHO
+     LINHA 6 DO EXCEL = ÍNDICE 5
+  ========================================== */
+
+  for(let coluna=0;coluna<16;coluna++){
+
+    const endereco =
+      XLSX.utils.encode_cell({
+        r:5,
+        c:coluna
+      });
+
+
+    if(ws[endereco]){
+
+      ws[endereco].s={
+
+        font:{
+          bold:true,
+          color:{
+            rgb:"FFFFFF"
+          }
+        },
+
+        fill:{
+          fgColor:{
+            rgb:"222222"
+          }
+        },
+
+        alignment:{
+          horizontal:"center",
+          vertical:"center"
+        },
+
+        border:{
+          top:{
+            style:"thin",
+            color:{rgb:"444444"}
+          },
+          bottom:{
+            style:"thin",
+            color:{rgb:"444444"}
+          },
+          left:{
+            style:"thin",
+            color:{rgb:"444444"}
+          },
+          right:{
+            style:"thin",
+            color:{rgb:"444444"}
+          }
+        }
+
+      };
+
+    }
+
+  }
+
+
+  /* ==========================================
+     ESTILO DOS DADOS
+  ========================================== */
+
+  const primeiraLinhaDados=6;
+
+  const ultimaLinhaDados=
+    primeiraLinhaDados +
+    dadosRelatorio.length -
+    1;
+
+
+  for(
+    let linha=primeiraLinhaDados;
+    linha<=ultimaLinhaDados;
+    linha++
+  ){
+
+    for(
+      let coluna=0;
+      coluna<16;
+      coluna++
+    ){
+
+      const endereco =
+        XLSX.utils.encode_cell({
+          r:linha,
+          c:coluna
+        });
+
+
+      const celula =
+        ws[endereco];
+
+
+      if(!celula){
+        continue;
+      }
+
+
+      celula.s={
+
+        alignment:{
+          vertical:"center",
+          horizontal:
+            coluna>=3
+            ? "center"
+            : "left"
+        },
+
+        border:{
+          top:{
+            style:"thin",
+            color:{rgb:"DDD6C9"}
+          },
+          bottom:{
+            style:"thin",
+            color:{rgb:"DDD6C9"}
+          },
+          left:{
+            style:"thin",
+            color:{rgb:"DDD6C9"}
+          },
+          right:{
+            style:"thin",
+            color:{rgb:"DDD6C9"}
+          }
+        }
+
+      };
+
+
+      /* RESULTADO */
+
+      if(coluna===4){
+
+        celula.s.font={
+          bold:true,
+          color:{
+            rgb:"32602D"
+          }
+        };
+
+        celula.s.fill={
+          fgColor:{
+            rgb:"DCEBD8"
+          }
+        };
+
+      }
+
+
+      /* QUESTÕES */
+
+      if(coluna>=5){
+
+        const valor =
+          String(
+            celula.v || ""
+          ).toUpperCase();
+
+
+        if(valor==="ACERTOU"){
+
+          celula.s.font={
+            bold:true,
+            color:{
+              rgb:"32602D"
+            }
+          };
+
+          celula.s.fill={
+            fgColor:{
+              rgb:"DCEBD8"
+            }
+          };
+
+        }
+
+
+        if(valor==="ERROU"){
+
+          celula.s.font={
+            bold:true,
+            color:{
+              rgb:"8B2929"
+            }
+          };
+
+          celula.s.fill={
+            fgColor:{
+              rgb:"F5DADA"
+            }
+          };
+
+        }
+
+      }
+
+    }
+
+  }
+
+
+  /* ==========================================
+     FILTRO AUTOMÁTICO
+  ========================================== */
+
+  ws["!autofilter"]={
+    ref:
+      `A6:P${6 + dadosRelatorio.length}`
+  };
+
+
+  /* ==========================================
+     CRIA ARQUIVO
+  ========================================== */
+
+  const wb =
+    XLSX.utils.book_new();
+
+
+  XLSX.utils.book_append_sheet(
+    wb,
+    ws,
+    "Aprovados"
+  );
+
+
+  const nomeArquivo =
+    `Relatorio_Integracao_${dataInicio.value}_a_${dataFim.value}.xlsx`;
+
+
+  XLSX.writeFile(
+    wb,
+    nomeArquivo
+  );
 
 }
 
@@ -970,9 +1612,13 @@ function mascararCPF(cpf){
     String(cpf || "")
       .replace(/\D/g,"");
 
+
   if(numeros.length!==11){
+
     return "***.***.***-**";
+
   }
+
 
   return (
     "***." +
@@ -991,14 +1637,21 @@ function formatarCPFCompleto(cpf){
     String(cpf || "")
       .replace(/\D/g,"");
 
+
   if(numeros.length!==11){
+
     return String(cpf || "");
+
   }
 
+
   return (
-    numeros.substring(0,3) + "." +
-    numeros.substring(3,6) + "." +
-    numeros.substring(6,9) + "-" +
+    numeros.substring(0,3) +
+    "." +
+    numeros.substring(3,6) +
+    "." +
+    numeros.substring(6,9) +
+    "-" +
     numeros.substring(9,11)
   );
 
@@ -1011,8 +1664,10 @@ function formatarDataHora(data){
     return "-";
   }
 
+
   const d =
     new Date(data);
+
 
   return d.toLocaleString(
     "pt-BR",
@@ -1028,13 +1683,42 @@ function formatarDataHora(data){
 }
 
 
+function formatarDataSimples(data){
+
+  if(!data){
+    return "-";
+  }
+
+
+  const partes =
+    data.split("-");
+
+
+  if(partes.length!==3){
+    return data;
+  }
+
+
+  return (
+    partes[2] +
+    "/" +
+    partes[1] +
+    "/" +
+    partes[0]
+  );
+
+}
+
+
 function escaparHTML(valor){
 
   const div =
     document.createElement("div");
 
+
   div.textContent =
     valor ?? "";
+
 
   return div.innerHTML;
 
@@ -1046,8 +1730,13 @@ function mostrarMensagem(id,texto){
   const elemento =
     document.getElementById(id);
 
-  elemento.textContent=texto;
-  elemento.style.display="block";
+
+  elemento.textContent=
+    texto;
+
+
+  elemento.style.display=
+    "block";
 
 }
 
@@ -1057,8 +1746,12 @@ function esconderMensagem(id){
   const elemento =
     document.getElementById(id);
 
+
   elemento.textContent="";
-  elemento.style.display="none";
+
+
+  elemento.style.display=
+    "none";
 
 }
 
@@ -1067,18 +1760,38 @@ function esconderMensagem(id){
    DATA PADRÃO = HOJE
 ===================================================== */
 
-const hoje =
-  new Date();
+function colocarDataHoje(){
 
-const hojeLocal =
-  [
+  const hoje =
+    new Date();
+
+
+  const hojeLocal = [
+
     hoje.getFullYear(),
-    String(hoje.getMonth()+1).padStart(2,"0"),
-    String(hoje.getDate()).padStart(2,"0")
+
+    String(
+      hoje.getMonth()+1
+    ).padStart(2,"0"),
+
+    String(
+      hoje.getDate()
+    ).padStart(2,"0")
+
   ].join("-");
 
-dataInicio.value=hojeLocal;
-dataFim.value=hojeLocal;
+
+  dataInicio.value=
+    hojeLocal;
+
+
+  dataFim.value=
+    hojeLocal;
+
+}
+
+
+colocarDataHoje();
 
 </script>
 

@@ -117,6 +117,12 @@
       cursor: not-allowed;
     }
 
+    .btn-tentar-novamente {
+      background: #222;
+      margin-top: 20px;
+      font-size: 17px;
+    }
+
     .aviso {
       margin-top: 18px;
       color: #777;
@@ -136,7 +142,7 @@
     }
 
     .oculto {
-      display: none;
+      display: none !important;
     }
 
     .nome {
@@ -315,14 +321,13 @@
       }
     }
   </style>
-
 </head>
 
 <body>
 
 <div class="app">
 
-  <!-- TELA DE ENTRADA -->
+  <!-- ENTRADA -->
   <section id="telaEntrada" class="card">
 
     <div class="logo">🏆</div>
@@ -361,7 +366,7 @@
   </section>
 
 
-  <!-- TELA DE CONFIRMAÇÃO -->
+  <!-- CONFIRMAÇÃO -->
   <section id="telaConfirmacao" class="card oculto">
 
     <div class="logo">👋</div>
@@ -394,7 +399,7 @@
   </section>
 
 
-  <!-- TELA DA PROVA -->
+  <!-- PROVA -->
   <section id="telaProva" class="card oculto">
 
     <div class="topo-prova">
@@ -422,12 +427,14 @@
   </section>
 
 
-  <!-- TELA FINAL -->
+  <!-- RESULTADO -->
   <section id="telaFinal" class="card final oculto">
 
     <div id="iconeResultado" class="trofeu">🏆</div>
 
-    <h2 id="tituloResultado">Desafio concluído!</h2>
+    <h2 id="tituloResultado">
+      Desafio concluído!
+    </h2>
 
     <p>Você acertou</p>
 
@@ -454,6 +461,16 @@
 
     </div>
 
+    <div id="erroNovaTentativa" class="erro"></div>
+
+    <button
+      id="btnTentarNovamente"
+      type="button"
+      class="btn-tentar-novamente oculto"
+    >
+      🔄 TENTAR NOVAMENTE
+    </button>
+
   </section>
 
 </div>
@@ -462,18 +479,18 @@
 <script type="module">
 
   /* =====================================================
-     CONFIGURAÇÃO SUPABASE
+     SUPABASE
      ===================================================== */
 
   const SUPABASE_URL =
-      "https://tkyhrxvdpgslmwxokksi.supabase.co";
+    "https://tkyhrxvdpgslmwxokksi.supabase.co";
 
   const SUPABASE_KEY =
-    "sb_publishable__bW5UZyxprdo5vfMPQLr3A_ddfUMVtO";
+     "sb_publishable__bW5UZyxprdo5vfMPQLr3A_ddfUMVtO";
 
 
   /* =====================================================
-     ELEMENTOS DA TELA
+     ELEMENTOS
      ===================================================== */
 
   const telaEntrada =
@@ -496,6 +513,9 @@
 
   const btnComecar =
     document.getElementById("btnComecar");
+
+  const btnTentarNovamente =
+    document.getElementById("btnTentarNovamente");
 
   const nomeColaborador =
     document.getElementById("nomeColaborador");
@@ -557,7 +577,7 @@
 
 
   /* =====================================================
-     CHAMADA AO SUPABASE
+     RPC
      ===================================================== */
 
   async function rpc(funcao, parametros = {}) {
@@ -577,7 +597,8 @@
       }
     );
 
-    const texto = await resposta.text();
+    const texto =
+      await resposta.text();
 
     let dados = null;
 
@@ -609,7 +630,7 @@
 
 
   /* =====================================================
-     MÁSCARA CPF
+     CPF
      ===================================================== */
 
   cpfInput.addEventListener("input", function () {
@@ -617,27 +638,30 @@
     let valor =
       this.value.replace(/\D/g, "").slice(0, 11);
 
-    valor = valor.replace(
-      /(\d{3})(\d)/,
-      "$1.$2"
-    );
+    valor =
+      valor.replace(
+        /(\d{3})(\d)/,
+        "$1.$2"
+      );
 
-    valor = valor.replace(
-      /(\d{3})(\d)/,
-      "$1.$2"
-    );
+    valor =
+      valor.replace(
+        /(\d{3})(\d)/,
+        "$1.$2"
+      );
 
-    valor = valor.replace(
-      /(\d{3})(\d{1,2})$/,
-      "$1-$2"
-    );
+    valor =
+      valor.replace(
+        /(\d{3})(\d{1,2})$/,
+        "$1-$2"
+      );
 
     this.value = valor;
   });
 
 
   /* =====================================================
-     ENTRAR NO DESAFIO
+     IDENTIFICAR PARTICIPANTE
      ===================================================== */
 
   btnEntrar.addEventListener("click", async () => {
@@ -658,16 +682,19 @@
     }
 
     btnEntrar.disabled = true;
-    btnEntrar.textContent = "LOCALIZANDO...";
+
+    btnEntrar.textContent =
+      "LOCALIZANDO...";
 
     try {
 
-      const resultado = await rpc(
-        "identificar_participante",
-        {
-          p_cpf: cpfAtual
-        }
-      );
+      const resultado =
+        await rpc(
+          "identificar_participante",
+          {
+            p_cpf: cpfAtual
+          }
+        );
 
       if (!resultado || resultado.length === 0) {
 
@@ -679,15 +706,8 @@
         return;
       }
 
-      const participante = resultado[0];
-
-      /*
-        O banco é quem deve informar se a pessoa
-        está definitivamente bloqueada/aprovada.
-
-        A função identificar_participante será ajustada
-        para considerar aprovado somente quem atingiu 9 ou mais.
-      */
+      const participante =
+        resultado[0];
 
       if (participante.ja_participou) {
 
@@ -734,57 +754,121 @@
 
 
   /* =====================================================
-     COMEÇAR PROVA
+     COMEÇAR PRIMEIRA / NOVA PROVA
      ===================================================== */
 
-  btnComecar.addEventListener("click", async () => {
+  btnComecar.addEventListener(
+    "click",
+    iniciarNovaProva
+  );
+
+
+  async function iniciarNovaProva() {
 
     esconderErro("erroInicio");
+    esconderErro("erroNovaTentativa");
+    esconderErro("erroProva");
 
     btnComecar.disabled = true;
+    btnTentarNovamente.disabled = true;
 
     btnComecar.textContent =
       "PREPARANDO DESAFIO...";
 
+    btnTentarNovamente.textContent =
+      "PREPARANDO NOVA TENTATIVA...";
+
     try {
 
-      const inicio = await rpc(
-        "iniciar_prova",
-        {
-          p_cpf: cpfAtual
-        }
-      );
+      /*
+      Cria uma nova tentativa no Supabase.
+      A função do banco já permite isso
+      somente para quem ainda não atingiu 9.
+      */
+
+      const inicio =
+        await rpc(
+          "iniciar_prova",
+          {
+            p_cpf: cpfAtual
+          }
+        );
 
       if (!inicio || inicio.length === 0) {
 
         throw new Error(
           "Não foi possível iniciar o desafio."
         );
-
       }
 
       tentativaId =
         inicio[0].tentativa_id;
 
-      perguntas = await rpc(
-        "carregar_perguntas"
-      );
+
+      /*
+      Carrega novamente as perguntas.
+      */
+
+      perguntas =
+        await rpc(
+          "carregar_perguntas"
+        );
 
       if (!perguntas || perguntas.length === 0) {
 
         throw new Error(
           "Nenhuma pergunta disponível."
         );
-
       }
+
+
+      /*
+      Zera completamente a tentativa na tela.
+      */
 
       indiceAtual = 0;
       segundos = 0;
+      salvandoResposta = false;
 
-      trocarTela(
-        telaConfirmacao,
-        telaProva
+      clearInterval(timer);
+
+      cronometro.textContent =
+        "00:00";
+
+      progresso.style.width =
+        "0%";
+
+      alternativas.innerHTML =
+        "";
+
+      btnTentarNovamente.classList.add(
+        "oculto"
       );
+
+
+      /*
+      Descobre de qual tela a pessoa
+      está iniciando a prova.
+      */
+
+      if (!telaConfirmacao.classList.contains("oculto")) {
+
+        trocarTela(
+          telaConfirmacao,
+          telaProva
+        );
+
+      }
+
+      else {
+
+        trocarTela(
+          telaFinal,
+          telaProva
+        );
+
+      }
+
 
       iniciarCronometro();
 
@@ -794,10 +878,28 @@
 
     catch (erro) {
 
-      mostrarErro(
-        "erroInicio",
-        erro.message
-      );
+      /*
+      Se estiver na tela final,
+      mostra o erro nela.
+      */
+
+      if (!telaFinal.classList.contains("oculto")) {
+
+        mostrarErro(
+          "erroNovaTentativa",
+          erro.message
+        );
+
+      }
+
+      else {
+
+        mostrarErro(
+          "erroInicio",
+          erro.message
+        );
+
+      }
 
     }
 
@@ -805,12 +907,27 @@
 
       btnComecar.disabled = false;
 
+      btnTentarNovamente.disabled = false;
+
       btnComecar.textContent =
         "COMEÇAR DESAFIO";
 
+      btnTentarNovamente.textContent =
+        "🔄 TENTAR NOVAMENTE";
+
     }
 
-  });
+  }
+
+
+  /* =====================================================
+     BOTÃO TENTAR NOVAMENTE
+     ===================================================== */
+
+  btnTentarNovamente.addEventListener(
+    "click",
+    iniciarNovaProva
+  );
 
 
   /* =====================================================
@@ -833,7 +950,8 @@
     textoPergunta.textContent =
       p.pergunta;
 
-    alternativas.innerHTML = "";
+    alternativas.innerHTML =
+      "";
 
     const opcoes = [
       ["A", p.alternativa_a],
@@ -851,7 +969,8 @@
       const botao =
         document.createElement("button");
 
-      botao.type = "button";
+      botao.type =
+        "button";
 
       botao.className =
         "alternativa";
@@ -894,7 +1013,7 @@
 
 
   /* =====================================================
-     SALVAR RESPOSTA
+     RESPONDER
      ===================================================== */
 
   async function responder(letra) {
@@ -903,12 +1022,17 @@
       return;
     }
 
-    salvandoResposta = true;
+    salvandoResposta =
+      true;
 
-    esconderErro("erroProva");
+    esconderErro(
+      "erroProva"
+    );
 
     const botoes =
-      document.querySelectorAll(".alternativa");
+      document.querySelectorAll(
+        ".alternativa"
+      );
 
     botoes.forEach(
       botao => botao.disabled = true
@@ -932,7 +1056,8 @@
 
       if (indiceAtual < perguntas.length) {
 
-        salvandoResposta = false;
+        salvandoResposta =
+          false;
 
         mostrarPergunta();
 
@@ -948,7 +1073,8 @@
 
     catch (erro) {
 
-      salvandoResposta = false;
+      salvandoResposta =
+        false;
 
       botoes.forEach(
         botao => botao.disabled = false
@@ -965,27 +1091,26 @@
 
 
   /* =====================================================
-     FINALIZAR PROVA
-     REGRA: 9 OU MAIS = APROVADO
+     FINALIZAR
      ===================================================== */
 
   async function finalizar() {
 
     try {
 
-      const resultado = await rpc(
-        "finalizar_prova",
-        {
-          p_tentativa_id: tentativaId
-        }
-      );
+      const resultado =
+        await rpc(
+          "finalizar_prova",
+          {
+            p_tentativa_id: tentativaId
+          }
+        );
 
       if (!resultado || resultado.length === 0) {
 
         throw new Error(
           "O resultado não foi retornado pelo sistema."
         );
-
       }
 
       clearInterval(timer);
@@ -994,7 +1119,9 @@
         resultado[0];
 
       const acertos =
-        Number(dados.total_acertos ?? 0);
+        Number(
+          dados.total_acertos ?? 0
+        );
 
       const total =
         Number(
@@ -1003,7 +1130,9 @@
         );
 
       const tempoSegundos =
-        Number(dados.tempo_segundos ?? 0);
+        Number(
+          dados.tempo_segundos ?? 0
+        );
 
       resultadoAcertos.textContent =
         acertos;
@@ -1012,14 +1141,14 @@
         total;
 
       resultadoTempo.textContent =
-        formatarTempo(tempoSegundos);
+        formatarTempo(
+          tempoSegundos
+        );
 
 
-      /*
-      =============================================
-      APROVAÇÃO
-      =============================================
-      */
+      /* =========================================
+         APROVADO
+         ========================================= */
 
       if (acertos >= 9) {
 
@@ -1041,14 +1170,20 @@
           "🏆 Acompanhe sua posição no " +
           "<strong>ranking no telão!</strong>";
 
+        /*
+        APROVADO NÃO PODE TENTAR NOVAMENTE
+        */
+
+        btnTentarNovamente.classList.add(
+          "oculto"
+        );
+
       }
 
 
-      /*
-      =============================================
-      NÃO APROVADO
-      =============================================
-      */
+      /* =========================================
+         NÃO APROVADO
+         ========================================= */
 
       else {
 
@@ -1067,8 +1202,16 @@
         resultadoOrientacao.innerHTML =
           "É necessário acertar pelo menos " +
           "<strong>9 das 11 questões</strong>.<br><br>" +
-          "🔄 Você deverá " +
-          "<strong>refazer o desafio</strong>.";
+          "Você pode realizar uma nova tentativa.";
+
+        /*
+        MOSTRA O BOTÃO SOMENTE PARA
+        QUEM FEZ MENOS DE 9.
+        */
+
+        btnTentarNovamente.classList.remove(
+          "oculto"
+        );
 
       }
 
@@ -1082,7 +1225,8 @@
 
     catch (erro) {
 
-      salvandoResposta = false;
+      salvandoResposta =
+        false;
 
       mostrarErro(
         "erroProva",
@@ -1102,15 +1246,19 @@
 
     clearInterval(timer);
 
+    segundos =
+      0;
+
     atualizarCronometro();
 
-    timer = setInterval(() => {
+    timer =
+      setInterval(() => {
 
-      segundos++;
+        segundos++;
 
-      atualizarCronometro();
+        atualizarCronometro();
 
-    }, 1000);
+      }, 1000);
 
   }
 
@@ -1118,7 +1266,9 @@
   function atualizarCronometro() {
 
     cronometro.textContent =
-      formatarTempo(segundos);
+      formatarTempo(
+        segundos
+      );
 
   }
 
@@ -1128,11 +1278,15 @@
     const valor =
       Math.max(
         0,
-        Math.floor(Number(totalSegundos) || 0)
+        Math.floor(
+          Number(totalSegundos) || 0
+        )
       );
 
     const minutos =
-      Math.floor(valor / 60);
+      Math.floor(
+        valor / 60
+      );
 
     const segundosRestantes =
       valor % 60;
@@ -1149,7 +1303,7 @@
 
 
   /* =====================================================
-     TROCAR TELAS
+     TROCAR TELA
      ===================================================== */
 
   function trocarTela(anterior, proxima) {
@@ -1171,7 +1325,7 @@
 
 
   /* =====================================================
-     MENSAGENS DE ERRO
+     ERROS
      ===================================================== */
 
   function mostrarErro(id, mensagem) {

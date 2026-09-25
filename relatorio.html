@@ -1,0 +1,1086 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Relatório da Integração</title>
+
+<style>
+*{
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
+  font-family:Arial,Helvetica,sans-serif;
+}
+
+body{
+  min-height:100vh;
+  background:linear-gradient(135deg,#171717,#292929);
+  color:#222;
+  padding:30px 18px;
+}
+
+.container{
+  max-width:1350px;
+  margin:auto;
+}
+
+.topo{
+  text-align:center;
+  color:white;
+  margin-bottom:30px;
+}
+
+.topo .icone{
+  font-size:45px;
+  margin-bottom:10px;
+}
+
+.topo h1{
+  font-size:36px;
+  margin-bottom:8px;
+}
+
+.topo p{
+  color:#ddd;
+}
+
+.card{
+  background:#f4f0e7;
+  border-radius:22px;
+  padding:28px;
+  margin-bottom:25px;
+  box-shadow:0 15px 40px rgba(0,0,0,.25);
+}
+
+.card h2{
+  margin-bottom:8px;
+}
+
+.descricao{
+  color:#666;
+  margin-bottom:22px;
+  line-height:1.5;
+}
+
+.grid-busca{
+  display:grid;
+  grid-template-columns:1fr auto;
+  gap:12px;
+}
+
+.grid-periodo{
+  display:grid;
+  grid-template-columns:1fr 1fr auto;
+  gap:12px;
+  align-items:end;
+}
+
+label{
+  display:block;
+  font-weight:bold;
+  margin-bottom:7px;
+}
+
+input{
+  width:100%;
+  height:52px;
+  border:2px solid #d7d0c3;
+  border-radius:11px;
+  padding:0 14px;
+  background:white;
+  font-size:16px;
+  outline:none;
+}
+
+input:focus{
+  border-color:#222;
+}
+
+button{
+  min-height:52px;
+  border:0;
+  border-radius:11px;
+  padding:0 22px;
+  background:#222;
+  color:white;
+  font-weight:bold;
+  font-size:15px;
+  cursor:pointer;
+}
+
+button:hover{
+  background:#333;
+}
+
+button:disabled{
+  opacity:.55;
+  cursor:not-allowed;
+}
+
+.btn-excel{
+  background:#556b4f;
+}
+
+.btn-excel:hover{
+  background:#465a41;
+}
+
+.mensagem{
+  padding:14px;
+  border-radius:10px;
+  margin-top:18px;
+  display:none;
+}
+
+.erro{
+  background:#f6dddd;
+  color:#922;
+}
+
+.info{
+  background:#e9e3d7;
+  color:#444;
+}
+
+.resumo{
+  display:flex;
+  gap:15px;
+  flex-wrap:wrap;
+  margin:22px 0 15px;
+}
+
+.resumo-item{
+  background:#e9e3d7;
+  padding:13px 18px;
+  border-radius:12px;
+  font-weight:bold;
+}
+
+.tentativa{
+  border:2px solid #ddd5c7;
+  background:white;
+  border-radius:16px;
+  padding:20px;
+  margin-top:16px;
+}
+
+.tentativa-topo{
+  display:flex;
+  justify-content:space-between;
+  gap:15px;
+  align-items:center;
+  flex-wrap:wrap;
+  margin-bottom:18px;
+}
+
+.nome{
+  font-size:21px;
+  font-weight:bold;
+}
+
+.dados{
+  color:#666;
+  margin-top:5px;
+  line-height:1.6;
+}
+
+.status{
+  padding:9px 14px;
+  border-radius:20px;
+  font-weight:bold;
+  font-size:14px;
+}
+
+.aprovado{
+  background:#dcebd8;
+  color:#32602d;
+}
+
+.reprovado{
+  background:#f5dada;
+  color:#8b2929;
+}
+
+.questoes{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:9px;
+}
+
+.questao{
+  padding:11px 8px;
+  border-radius:9px;
+  text-align:center;
+  font-size:13px;
+  font-weight:bold;
+}
+
+.acertou{
+  background:#dcebd8;
+  color:#32602d;
+}
+
+.errou{
+  background:#f5dada;
+  color:#8b2929;
+}
+
+.tabela-container{
+  overflow-x:auto;
+  margin-top:20px;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  min-width:1050px;
+  background:white;
+  border-radius:12px;
+  overflow:hidden;
+}
+
+th{
+  background:#222;
+  color:white;
+  padding:13px 10px;
+  text-align:left;
+  white-space:nowrap;
+}
+
+td{
+  padding:12px 10px;
+  border-bottom:1px solid #e5e0d7;
+  white-space:nowrap;
+}
+
+td.certo{
+  color:#32602d;
+  font-weight:bold;
+}
+
+td.errado{
+  color:#9b2929;
+  font-weight:bold;
+}
+
+.acoes-relatorio{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:15px;
+  flex-wrap:wrap;
+  margin-top:20px;
+}
+
+.oculto{
+  display:none !important;
+}
+
+@media(max-width:800px){
+  .grid-busca,
+  .grid-periodo{
+    grid-template-columns:1fr;
+  }
+
+  button{
+    width:100%;
+  }
+
+  .questoes{
+    grid-template-columns:repeat(2,1fr);
+  }
+
+  .topo h1{
+    font-size:28px;
+  }
+
+  .card{
+    padding:21px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <div class="topo">
+    <div class="icone">📋</div>
+    <h1>Relatório da Integração</h1>
+    <p>Consulta de resultados e emissão da lista de aprovados</p>
+  </div>
+
+
+  <!-- CONSULTA INDIVIDUAL -->
+
+  <section class="card">
+
+    <h2>🔎 Consultar colaborador</h2>
+
+    <p class="descricao">
+      Pesquise pelo nome para consultar todas as tentativas realizadas
+      e verificar as questões que o colaborador acertou ou errou.
+    </p>
+
+    <div class="grid-busca">
+
+      <input
+        type="text"
+        id="nomePesquisa"
+        placeholder="Digite o nome do colaborador"
+        autocomplete="off"
+      >
+
+      <button id="btnPesquisar">
+        PESQUISAR
+      </button>
+
+    </div>
+
+    <div id="erroPesquisa" class="mensagem erro"></div>
+
+    <div id="resultadoPesquisa"></div>
+
+  </section>
+
+
+  <!-- RELATÓRIO POR PERÍODO -->
+
+  <section class="card">
+
+    <h2>📅 Lista de aprovados por período</h2>
+
+    <p class="descricao">
+      Selecione uma data ou período para consultar os colaboradores
+      aprovados e gerar a lista da integração.
+    </p>
+
+    <div class="grid-periodo">
+
+      <div>
+        <label for="dataInicio">Data inicial</label>
+        <input type="date" id="dataInicio">
+      </div>
+
+      <div>
+        <label for="dataFim">Data final</label>
+        <input type="date" id="dataFim">
+      </div>
+
+      <button id="btnBuscarPeriodo">
+        🔎 BUSCAR
+      </button>
+
+    </div>
+
+    <div id="erroPeriodo" class="mensagem erro"></div>
+
+    <div id="areaRelatorio" class="oculto">
+
+      <div class="acoes-relatorio">
+
+        <div id="quantidade" class="resumo-item"></div>
+
+        <button id="btnExcel" class="btn-excel">
+          📥 BAIXAR EXCEL
+        </button>
+
+      </div>
+
+      <div class="tabela-container">
+
+        <table>
+
+          <thead>
+            <tr>
+              <th>Nome</th>
+              <th>CPF</th>
+              <th>Data da prova</th>
+              <th>Nota</th>
+              <th>Resultado</th>
+              <th>Q1</th>
+              <th>Q2</th>
+              <th>Q3</th>
+              <th>Q4</th>
+              <th>Q5</th>
+              <th>Q6</th>
+              <th>Q7</th>
+              <th>Q8</th>
+              <th>Q9</th>
+              <th>Q10</th>
+              <th>Q11</th>
+            </tr>
+          </thead>
+
+          <tbody id="corpoRelatorio"></tbody>
+
+        </table>
+
+      </div>
+
+    </div>
+
+  </section>
+
+</div>
+
+
+<script>
+
+const SUPABASE_URL =
+ "https://tkyhrxvdpgslmwxokksi.supabase.co";
+
+const SUPABASE_KEY =
+  "sb_publishable__bW5UZyxprdo5vfMPQLr3A_ddfUMVtO";
+
+
+let dadosRelatorio = [];
+
+
+/* =====================================================
+   RPC
+===================================================== */
+
+async function rpc(funcao,parametros={}){
+
+  const resposta = await fetch(
+    `${SUPABASE_URL}/rest/v1/rpc/${funcao}`,
+    {
+      method:"POST",
+
+      headers:{
+        "Content-Type":"application/json",
+        "apikey":SUPABASE_KEY,
+        "Authorization":`Bearer ${SUPABASE_KEY}`
+      },
+
+      body:JSON.stringify(parametros)
+    }
+  );
+
+  const texto = await resposta.text();
+
+  let dados = null;
+
+  if(texto){
+    try{
+      dados=JSON.parse(texto);
+    }
+    catch{
+      dados=texto;
+    }
+  }
+
+  if(!resposta.ok){
+
+    throw new Error(
+      dados?.message ||
+      dados?.error ||
+      "Não foi possível realizar a consulta."
+    );
+
+  }
+
+  return dados;
+}
+
+
+/* =====================================================
+   PESQUISAR COLABORADOR
+===================================================== */
+
+const btnPesquisar =
+  document.getElementById("btnPesquisar");
+
+const nomePesquisa =
+  document.getElementById("nomePesquisa");
+
+const resultadoPesquisa =
+  document.getElementById("resultadoPesquisa");
+
+
+btnPesquisar.addEventListener(
+  "click",
+  pesquisarColaborador
+);
+
+
+nomePesquisa.addEventListener(
+  "keydown",
+  e=>{
+    if(e.key==="Enter"){
+      pesquisarColaborador();
+    }
+  }
+);
+
+
+async function pesquisarColaborador(){
+
+  esconderMensagem("erroPesquisa");
+
+  const nome =
+    nomePesquisa.value.trim();
+
+  resultadoPesquisa.innerHTML="";
+
+  if(nome.length < 2){
+
+    mostrarMensagem(
+      "erroPesquisa",
+      "Digite pelo menos 2 letras do nome."
+    );
+
+    return;
+  }
+
+  btnPesquisar.disabled=true;
+  btnPesquisar.textContent="PESQUISANDO...";
+
+  try{
+
+    const dados = await rpc(
+      "consultar_historico_colaborador",
+      {
+        p_nome:nome
+      }
+    );
+
+    if(!dados || dados.length===0){
+
+      resultadoPesquisa.innerHTML=`
+        <div class="mensagem info" style="display:block">
+          Nenhum resultado encontrado para esse nome.
+        </div>
+      `;
+
+      return;
+    }
+
+    montarHistorico(dados);
+
+  }
+  catch(erro){
+
+    mostrarMensagem(
+      "erroPesquisa",
+      erro.message
+    );
+
+  }
+  finally{
+
+    btnPesquisar.disabled=false;
+    btnPesquisar.textContent="PESQUISAR";
+
+  }
+
+}
+
+
+/* =====================================================
+   HISTÓRICO
+===================================================== */
+
+function montarHistorico(dados){
+
+  resultadoPesquisa.innerHTML="";
+
+  dados.forEach(item=>{
+
+    const aprovado =
+      Number(item.nota)>=9;
+
+    const cpf =
+      mascararCPF(item.cpf);
+
+    const data =
+      formatarDataHora(item.data_prova);
+
+    let questoes="";
+
+    for(let i=1;i<=11;i++){
+
+      const valor =
+        item[`questao_${i}`] || "-";
+
+      const classe =
+        valor==="ACERTOU"
+        ? "acertou"
+        : "errou";
+
+      const icone =
+        valor==="ACERTOU"
+        ? "✅"
+        : "❌";
+
+      questoes += `
+        <div class="questao ${classe}">
+          Q${i} — ${icone} ${valor}
+        </div>
+      `;
+
+    }
+
+    resultadoPesquisa.innerHTML += `
+
+      <div class="tentativa">
+
+        <div class="tentativa-topo">
+
+          <div>
+
+            <div class="nome">
+              ${escaparHTML(item.nome)}
+            </div>
+
+            <div class="dados">
+              ${escaparHTML(item.setor || "-")}<br>
+              CPF: ${cpf}<br>
+              ${item.numero_tentativa}ª tentativa • ${data}<br>
+              Nota: <strong>${item.nota}/11</strong>
+            </div>
+
+          </div>
+
+          <div class="status ${aprovado ? "aprovado" : "reprovado"}">
+            ${aprovado ? "✅ APROVADO" : "❌ NÃO APROVADO"}
+          </div>
+
+        </div>
+
+        <div class="questoes">
+          ${questoes}
+        </div>
+
+      </div>
+    `;
+
+  });
+
+}
+
+
+/* =====================================================
+   RELATÓRIO POR PERÍODO
+===================================================== */
+
+const btnBuscarPeriodo =
+  document.getElementById("btnBuscarPeriodo");
+
+const dataInicio =
+  document.getElementById("dataInicio");
+
+const dataFim =
+  document.getElementById("dataFim");
+
+const areaRelatorio =
+  document.getElementById("areaRelatorio");
+
+const corpoRelatorio =
+  document.getElementById("corpoRelatorio");
+
+const quantidade =
+  document.getElementById("quantidade");
+
+
+btnBuscarPeriodo.addEventListener(
+  "click",
+  buscarPeriodo
+);
+
+
+async function buscarPeriodo(){
+
+  esconderMensagem("erroPeriodo");
+
+  areaRelatorio.classList.add("oculto");
+
+  if(!dataInicio.value || !dataFim.value){
+
+    mostrarMensagem(
+      "erroPeriodo",
+      "Selecione a data inicial e a data final."
+    );
+
+    return;
+  }
+
+  if(dataFim.value < dataInicio.value){
+
+    mostrarMensagem(
+      "erroPeriodo",
+      "A data final não pode ser anterior à data inicial."
+    );
+
+    return;
+  }
+
+  btnBuscarPeriodo.disabled=true;
+  btnBuscarPeriodo.textContent="BUSCANDO...";
+
+  try{
+
+    dadosRelatorio = await rpc(
+      "relatorio_aprovados_integracao",
+      {
+        p_data_inicio:dataInicio.value,
+        p_data_fim:dataFim.value
+      }
+    );
+
+    montarTabela();
+
+  }
+  catch(erro){
+
+    mostrarMensagem(
+      "erroPeriodo",
+      erro.message
+    );
+
+  }
+  finally{
+
+    btnBuscarPeriodo.disabled=false;
+    btnBuscarPeriodo.textContent="🔎 BUSCAR";
+
+  }
+
+}
+
+
+/* =====================================================
+   TABELA
+===================================================== */
+
+function montarTabela(){
+
+  corpoRelatorio.innerHTML="";
+
+  quantidade.textContent =
+    `${dadosRelatorio.length} aprovado(s) encontrado(s)`;
+
+  if(dadosRelatorio.length===0){
+
+    corpoRelatorio.innerHTML=`
+      <tr>
+        <td colspan="16">
+          Nenhum aprovado encontrado no período selecionado.
+        </td>
+      </tr>
+    `;
+
+    areaRelatorio.classList.remove("oculto");
+
+    return;
+  }
+
+  dadosRelatorio.forEach(item=>{
+
+    let questoes="";
+
+    for(let i=1;i<=11;i++){
+
+      const valor =
+        item[`questao_${i}`] || "-";
+
+      const classe =
+        valor==="ACERTOU"
+        ? "certo"
+        : "errado";
+
+      questoes += `
+        <td class="${classe}">
+          ${valor}
+        </td>
+      `;
+
+    }
+
+    corpoRelatorio.innerHTML += `
+
+      <tr>
+
+        <td>${escaparHTML(item.nome)}</td>
+
+        <td>${mascararCPF(item.cpf)}</td>
+
+        <td>${formatarDataHora(item.data_prova)}</td>
+
+        <td><strong>${item.nota}/11</strong></td>
+
+        <td>
+          <strong>APROVADO</strong>
+        </td>
+
+        ${questoes}
+
+      </tr>
+    `;
+
+  });
+
+  areaRelatorio.classList.remove("oculto");
+
+}
+
+
+/* =====================================================
+   BAIXAR EXCEL
+===================================================== */
+
+document
+.getElementById("btnExcel")
+.addEventListener(
+  "click",
+  baixarExcel
+);
+
+
+function baixarExcel(){
+
+  if(!dadosRelatorio.length){
+
+    alert(
+      "Não há dados para exportar."
+    );
+
+    return;
+  }
+
+  /*
+    O arquivo é gerado em formato CSV compatível
+    com Excel. Isso permite funcionar diretamente
+    no navegador sem instalar bibliotecas.
+  */
+
+  const cabecalho = [
+    "Nome",
+    "CPF",
+    "Data da prova",
+    "Nota",
+    "Resultado",
+    "Questão 1",
+    "Questão 2",
+    "Questão 3",
+    "Questão 4",
+    "Questão 5",
+    "Questão 6",
+    "Questão 7",
+    "Questão 8",
+    "Questão 9",
+    "Questão 10",
+    "Questão 11"
+  ];
+
+  const linhas = [
+    cabecalho
+  ];
+
+  dadosRelatorio.forEach(item=>{
+
+    const linha = [
+
+      item.nome || "",
+
+      formatarCPFCompleto(item.cpf),
+
+      formatarDataHora(item.data_prova),
+
+      `${item.nota}/11`,
+
+      "APROVADO",
+
+      item.questao_1 || "",
+      item.questao_2 || "",
+      item.questao_3 || "",
+      item.questao_4 || "",
+      item.questao_5 || "",
+      item.questao_6 || "",
+      item.questao_7 || "",
+      item.questao_8 || "",
+      item.questao_9 || "",
+      item.questao_10 || "",
+      item.questao_11 || ""
+    ];
+
+    linhas.push(linha);
+
+  });
+
+
+  const csv =
+    linhas
+      .map(linha =>
+        linha
+          .map(valor =>
+            `"${String(valor).replace(/"/g,'""')}"`
+          )
+          .join(";")
+      )
+      .join("\r\n");
+
+
+  const blob =
+    new Blob(
+      [
+        "\uFEFF",
+        csv
+      ],
+      {
+        type:
+          "text/csv;charset=utf-8;"
+      }
+    );
+
+
+  const link =
+    document.createElement("a");
+
+  const url =
+    URL.createObjectURL(blob);
+
+  link.href=url;
+
+  link.download =
+    `Relatorio_Integracao_${dataInicio.value}_a_${dataFim.value}.csv`;
+
+  document.body.appendChild(link);
+
+  link.click();
+
+  document.body.removeChild(link);
+
+  URL.revokeObjectURL(url);
+
+}
+
+
+/* =====================================================
+   UTILITÁRIOS
+===================================================== */
+
+function mascararCPF(cpf){
+
+  const numeros =
+    String(cpf || "")
+      .replace(/\D/g,"");
+
+  if(numeros.length!==11){
+    return "***.***.***-**";
+  }
+
+  return (
+    "***." +
+    numeros.substring(3,6) +
+    "." +
+    numeros.substring(6,9) +
+    "-**"
+  );
+
+}
+
+
+function formatarCPFCompleto(cpf){
+
+  const numeros =
+    String(cpf || "")
+      .replace(/\D/g,"");
+
+  if(numeros.length!==11){
+    return String(cpf || "");
+  }
+
+  return (
+    numeros.substring(0,3) + "." +
+    numeros.substring(3,6) + "." +
+    numeros.substring(6,9) + "-" +
+    numeros.substring(9,11)
+  );
+
+}
+
+
+function formatarDataHora(data){
+
+  if(!data){
+    return "-";
+  }
+
+  const d =
+    new Date(data);
+
+  return d.toLocaleString(
+    "pt-BR",
+    {
+      day:"2-digit",
+      month:"2-digit",
+      year:"numeric",
+      hour:"2-digit",
+      minute:"2-digit"
+    }
+  );
+
+}
+
+
+function escaparHTML(valor){
+
+  const div =
+    document.createElement("div");
+
+  div.textContent =
+    valor ?? "";
+
+  return div.innerHTML;
+
+}
+
+
+function mostrarMensagem(id,texto){
+
+  const elemento =
+    document.getElementById(id);
+
+  elemento.textContent=texto;
+  elemento.style.display="block";
+
+}
+
+
+function esconderMensagem(id){
+
+  const elemento =
+    document.getElementById(id);
+
+  elemento.textContent="";
+  elemento.style.display="none";
+
+}
+
+
+/* =====================================================
+   DATA PADRÃO = HOJE
+===================================================== */
+
+const hoje =
+  new Date();
+
+const hojeLocal =
+  [
+    hoje.getFullYear(),
+    String(hoje.getMonth()+1).padStart(2,"0"),
+    String(hoje.getDate()).padStart(2,"0")
+  ].join("-");
+
+dataInicio.value=hojeLocal;
+dataFim.value=hojeLocal;
+
+</script>
+
+</body>
+</html>

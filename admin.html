@@ -114,11 +114,14 @@
       box-shadow: 0 20px 45px rgba(0,0,0,.22);
       margin-bottom: 24px;
     }
-
-    .painel.oculto {
-      display: none;
-    }
-
+.oculto {
+  display: none !important;
+}
+    
+#painelTurmas:not(.oculto),
+#painelRelatorios:not(.oculto) {
+  display: block !important;
+}
     .titulo-painel {
       margin-bottom: 22px;
     }

@@ -1,0 +1,3351 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Gestão da Integração</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at top right, rgba(255,255,255,.07), transparent 35%),
+        linear-gradient(135deg, #171717, #292929);
+      color: #222;
+      padding: 32px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 1450px;
+      margin: auto;
+    }
+
+    /* =========================
+       CABEÇALHO
+    ========================= */
+
+    .cabecalho {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 28px;
+      color: white;
+    }
+
+    .titulo-area {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+    }
+
+    .icone-topo {
+      width: 68px;
+      height: 68px;
+      border-radius: 18px;
+      background: #f4f0e7;
+      color: #222;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 34px;
+    }
+
+    .cabecalho h1 {
+      font-size: 34px;
+      margin-bottom: 5px;
+    }
+
+    .cabecalho p {
+      color: #eee8dd;
+    }
+
+    .perfil {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: bold;
+    }
+
+    /* =========================
+       ABAS
+    ========================= */
+
+    .abas {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 0;
+    }
+
+    .aba {
+      width: auto;
+      border: 0;
+      padding: 17px 28px;
+      border-radius: 14px 14px 0 0;
+      background: #292929;
+      color: white;
+      font-weight: bold;
+      font-size: 15px;
+      cursor: pointer;
+    }
+
+    .aba.ativa {
+      background: #f4f0e7;
+      color: #222;
+    }
+
+    /* =========================
+       PAINÉIS
+    ========================= */
+
+    .painel {
+      background: #f4f0e7;
+      border-radius: 0 22px 22px 22px;
+      padding: 26px;
+      box-shadow: 0 20px 45px rgba(0,0,0,.22);
+      margin-bottom: 24px;
+    }
+
+    .painel.oculto {
+      display: none;
+    }
+
+    .titulo-painel {
+      margin-bottom: 22px;
+    }
+
+    .titulo-painel h2 {
+      font-size: 24px;
+      margin-bottom: 5px;
+    }
+
+    .titulo-painel p {
+      color: #696969;
+    }
+
+    /* =========================
+       FORMULÁRIOS
+    ========================= */
+
+    .linha-filtros {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 14px;
+      align-items: end;
+      margin-bottom: 20px;
+    }
+
+    .campo label {
+      display: block;
+      font-size: 13px;
+      font-weight: bold;
+      margin-bottom: 7px;
+    }
+
+    input,
+    select {
+      width: 100%;
+      height: 46px;
+      border: 1px solid #d6cfc2;
+      border-radius: 9px;
+      padding: 0 12px;
+      background: white;
+      font-size: 14px;
+      outline: none;
+    }
+
+    input:focus,
+    select:focus {
+      border-color: #9b8251;
+    }
+
+    /* =========================
+       BOTÕES
+    ========================= */
+
+    .acoes-topo {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 22px;
+    }
+
+    button {
+      border: 0;
+      border-radius: 9px;
+      padding: 13px 18px;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .btn-principal {
+      background: #222;
+      color: white;
+    }
+
+    .btn-dourado {
+      background: #a88445;
+      color: white;
+    }
+
+    .btn-claro {
+      background: #ddd5c8;
+      color: #222;
+    }
+
+    .btn-ver {
+      padding: 7px 11px;
+      background: #e6dfd3;
+    }
+
+    .btn-excluir {
+      padding: 7px 11px;
+      background: #f7dddd;
+      color: #a51e1e;
+    }
+
+    button:hover {
+      filter: brightness(.95);
+    }
+
+    /* =========================
+       TABELAS
+    ========================= */
+
+    .tabela-wrap {
+      width: 100%;
+      overflow-x: auto;
+      border-radius: 12px;
+      border: 1px solid #ddd6ca;
+      background: white;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 950px;
+    }
+
+    th {
+      background: #e8e1d5;
+      color: #4c4c4c;
+      font-size: 12px;
+      text-align: left;
+      padding: 13px 12px;
+    }
+
+    td {
+      padding: 12px;
+      border-bottom: 1px solid #eee8de;
+      font-size: 13px;
+    }
+
+    tbody tr:hover {
+      background: #faf8f3;
+    }
+
+    /* =========================
+       STATUS
+    ========================= */
+
+    .status {
+      display: inline-block;
+      padding: 6px 11px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: bold;
+      white-space: nowrap;
+    }
+
+    .nao-fez {
+      background: #ffdada;
+      color: #b52222;
+    }
+
+    .andamento {
+      background: #e4e0f7;
+      color: #5d4d9a;
+    }
+
+    .nao-passou {
+      background: #ffe4b5;
+      color: #9a6200;
+    }
+
+    .aprovado {
+      background: #dcefd9;
+      color: #257332;
+    }
+
+    /* =========================
+       INDICADORES
+    ========================= */
+
+    .indicadores {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+      margin: 20px 0;
+    }
+
+    .indicador {
+      background: white;
+      border: 1px solid #ddd5c8;
+      border-radius: 13px;
+      padding: 18px;
+    }
+
+    .indicador .numero {
+      font-size: 29px;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+
+    .indicador .descricao {
+      color: #696969;
+      font-size: 13px;
+    }
+
+    /* =========================
+       MODAL
+    ========================= */
+
+    .modal-fundo {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.65);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      z-index: 999;
+    }
+
+    .modal-fundo.aberto {
+      display: flex;
+    }
+
+    .modal {
+      width: 100%;
+      max-width: 550px;
+      background: #f4f0e7;
+      border-radius: 20px;
+      padding: 26px;
+    }
+
+    .modal h2 {
+      margin-bottom: 20px;
+    }
+
+    .modal .campo {
+      margin-bottom: 15px;
+    }
+
+    .modal-acoes {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    /* =========================
+       MENSAGENS
+    ========================= */
+
+    .mensagem {
+      display: none;
+      padding: 13px;
+      border-radius: 9px;
+      margin-bottom: 18px;
+      font-size: 14px;
+    }
+
+    .mensagem.sucesso {
+      display: block;
+      background: #dcefd9;
+      color: #23672d;
+    }
+
+    .mensagem.erro {
+      display: block;
+      background: #f8dddd;
+      color: #982323;
+    }
+
+    .rodape-tabela {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 15px;
+      color: #666;
+      font-size: 13px;
+    }
+
+    /* =========================
+       RESPONSIVO
+    ========================= */
+
+    @media (max-width: 900px) {
+      body {
+        padding: 15px;
+      }
+
+      .cabecalho {
+        align-items: flex-start;
+      }
+
+      .perfil {
+        display: none;
+      }
+
+      .linha-filtros {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .indicadores {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .cabecalho h1 {
+        font-size: 25px;
+      }
+
+      .icone-topo {
+        width: 55px;
+        height: 55px;
+      }
+
+      .abas {
+        overflow-x: auto;
+      }
+
+      .aba {
+        white-space: nowrap;
+      }
+
+      .linha-filtros,
+      .indicadores {
+        grid-template-columns: 1fr;
+      }
+
+      .painel {
+        padding: 18px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <!-- CABEÇALHO -->
+  <header class="cabecalho">
+
+    <div class="titulo-area">
+      <div class="icone-topo">👥</div>
+
+      <div>
+        <h1>Gestão da Integração</h1>
+        <p>Cadastro de participantes e acompanhamento das integrações</p>
+      </div>
+    </div>
+
+    <div class="perfil">
+      👤 ADM de Pessoas
+    </div>
+
+  </header>
+
+  <!-- ABAS -->
+  <div class="abas">
+
+    <button
+      id="btnAbaTurmas"
+      class="aba ativa"
+      type="button"
+    >
+      👥 TURMAS / PARTICIPANTES
+    </button>
+
+    <button
+      id="btnAbaRelatorios"
+      class="aba"
+      type="button"
+    >
+      📊 RELATÓRIOS
+    </button>
+
+  </div>
+
+  <!-- ============================================
+       ABA TURMAS / PARTICIPANTES
+  ============================================= -->
+
+  <section id="painelTurmas" class="painel">
+
+    <div class="titulo-painel">
+      <h2>📅 Turma da Integração</h2>
+      <p>Cadastre os colaboradores que deverão realizar a prova de integração.</p>
+    </div>
+
+    <div id="mensagemTurmas" class="mensagem"></div>
+
+    <div class="linha-filtros">
+
+      <div class="campo">
+        <label>Data da integração</label>
+        <input id="dataTurma" type="date">
+      </div>
+
+      <div class="campo">
+        <label>Turma</label>
+        <select id="selectTurma">
+          <option value="">Selecione uma turma</option>
+        </select>
+      </div>
+
+      <div class="campo">
+        <label>Setor</label>
+        <select id="filtroSetorTurma">
+          <option value="">Todos</option>
+        </select>
+      </div>
+
+    </div>
+
+    <div class="acoes-topo">
+
+      <button
+        id="btnCriarTurma"
+        class="btn-dourado"
+        type="button"
+      >
+        + CRIAR TURMA
+      </button>
+
+      <button
+        id="btnAdicionar"
+        class="btn-principal"
+        type="button"
+      >
+        + ADICIONAR COLABORADOR
+      </button>
+
+      <button
+        id="btnImportar"
+        class="btn-claro"
+        type="button"
+      >
+        📥 IMPORTAR EXCEL
+      </button>
+
+      <input
+        id="arquivoExcel"
+        type="file"
+        accept=".xlsx,.xls,.csv"
+        hidden
+      >
+
+    </div>
+
+    <div class="tabela-wrap">
+
+      <table>
+
+        <thead>
+          <tr>
+            <th>COLABORADOR</th>
+            <th>CPF</th>
+            <th>CRACHÁ</th>
+            <th>SETOR</th>
+            <th>DATA DA INTEGRAÇÃO</th>
+            <th>TENTATIVAS</th>
+            <th>MELHOR NOTA</th>
+            <th>SITUAÇÃO</th>
+            <th>AÇÕES</th>
+          </tr>
+        </thead>
+
+        <tbody id="tabelaParticipantes">
+
+          <tr>
+            <td colspan="9" style="text-align:center;padding:35px;color:#777;">
+              Selecione uma turma para visualizar os participantes.
+            </td>
+          </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+    <div class="rodape-tabela">
+      <span id="totalParticipantes">Total de participantes: 0</span>
+    </div>
+     <!-- ============================================
+       ABA RELATÓRIOS
+  ============================================= -->
+
+  <section id="painelRelatorios" class="painel oculto">
+
+    <div class="titulo-painel">
+      <h2>📊 Relatórios da Integração</h2>
+      <p>
+        Consulte os participantes por período, setor, situação
+        ou colaborador.
+      </p>
+    </div>
+
+    <div id="mensagemRelatorios" class="mensagem"></div>
+
+    <div class="linha-filtros">
+
+      <div class="campo">
+        <label>Data inicial</label>
+        <input id="dataInicial" type="date">
+      </div>
+
+      <div class="campo">
+        <label>Data final</label>
+        <input id="dataFinal" type="date">
+      </div>
+
+      <div class="campo">
+        <label>Setor</label>
+
+        <select id="filtroSetorRelatorio">
+          <option value="">Todos</option>
+        </select>
+      </div>
+
+      <div class="campo">
+        <label>Situação</label>
+
+        <select id="filtroSituacao">
+          <option value="">Todos</option>
+          <option value="NÃO FEZ">Não fez</option>
+          <option value="EM ANDAMENTO">Em andamento</option>
+          <option value="NÃO PASSOU">Não passou</option>
+          <option value="APROVADO">Aprovado</option>
+        </select>
+      </div>
+
+      <div class="campo">
+        <label>Colaborador</label>
+
+        <input
+          id="filtroColaborador"
+          type="text"
+          placeholder="Nome, CPF ou crachá"
+        >
+      </div>
+
+    </div>
+
+    <div class="acoes-topo">
+
+      <button
+        id="btnBuscarRelatorio"
+        class="btn-principal"
+        type="button"
+      >
+        🔎 BUSCAR
+      </button>
+
+      <button
+        id="btnLimparRelatorio"
+        class="btn-claro"
+        type="button"
+      >
+        🧹 LIMPAR
+      </button>
+
+      <button
+        id="btnExportarExcel"
+        class="btn-dourado"
+        type="button"
+      >
+        📥 EXPORTAR EXCEL
+      </button>
+
+    </div>
+
+
+    <!-- INDICADORES -->
+
+    <div class="indicadores">
+
+      <div class="indicador">
+        <div
+          id="indicadorPrevistos"
+          class="numero"
+        >
+          0
+        </div>
+
+        <div class="descricao">
+          👥 Participantes previstos
+        </div>
+      </div>
+
+
+      <div class="indicador">
+        <div
+          id="indicadorNaoFez"
+          class="numero"
+        >
+          0
+        </div>
+
+        <div class="descricao">
+          📝 Não fizeram
+        </div>
+      </div>
+
+
+      <div class="indicador">
+        <div
+          id="indicadorNaoPassou"
+          class="numero"
+        >
+          0
+        </div>
+
+        <div class="descricao">
+          🔄 Ainda não passaram
+        </div>
+      </div>
+
+
+      <div class="indicador">
+        <div
+          id="indicadorAprovados"
+          class="numero"
+        >
+          0
+        </div>
+
+        <div class="descricao">
+          ✅ Aprovados
+        </div>
+      </div>
+
+    </div>
+
+
+    <!-- TABELA RELATÓRIO -->
+
+    <div class="tabela-wrap">
+
+      <table>
+
+        <thead>
+
+          <tr>
+            <th>COLABORADOR</th>
+            <th>CPF</th>
+            <th>CRACHÁ</th>
+            <th>SETOR</th>
+            <th>DATA</th>
+            <th>TENTATIVAS</th>
+            <th>MELHOR NOTA</th>
+            <th>SITUAÇÃO</th>
+          </tr>
+
+        </thead>
+
+        <tbody id="tabelaRelatorio">
+
+          <tr>
+
+            <td
+              colspan="8"
+              style="
+                text-align:center;
+                padding:35px;
+                color:#777;
+              "
+            >
+              Utilize os filtros acima para consultar os participantes.
+            </td>
+
+          </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+
+    <div class="rodape-tabela">
+
+      <span id="totalRelatorio">
+        Registros encontrados: 0
+      </span>
+
+    </div>
+
+  </section>
+
+
+  <!-- ============================================
+       MODAL ADICIONAR COLABORADOR
+  ============================================= -->
+
+  <div
+    id="modalAdicionar"
+    class="modal-fundo"
+  >
+
+    <div class="modal">
+
+      <h2>👤 Adicionar colaborador</h2>
+
+      <div id="mensagemModal" class="mensagem"></div>
+
+
+      <div class="campo">
+
+        <label>CPF do colaborador</label>
+
+        <input
+          id="modalCpf"
+          type="text"
+          inputmode="numeric"
+          maxlength="14"
+          placeholder="000.000.000-00"
+        >
+
+      </div>
+
+
+      <div class="campo">
+
+        <label>Nome</label>
+
+        <input
+          id="modalNome"
+          type="text"
+          placeholder="Nome completo"
+        >
+
+      </div>
+
+
+      <div class="campo">
+
+        <label>Crachá</label>
+
+        <input
+          id="modalCracha"
+          type="text"
+          placeholder="Número do crachá"
+        >
+
+      </div>
+
+
+      <div class="campo">
+
+        <label>Setor</label>
+
+        <input
+          id="modalSetor"
+          type="text"
+          placeholder="Setor do colaborador"
+        >
+
+      </div>
+
+
+      <div class="modal-acoes">
+
+        <button
+          id="btnCancelarModal"
+          class="btn-claro"
+          type="button"
+        >
+          CANCELAR
+        </button>
+
+        <button
+          id="btnSalvarColaborador"
+          class="btn-principal"
+          type="button"
+        >
+          SALVAR COLABORADOR
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div> 
+
+  </section>
+    <!-- SUPABASE -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <script>
+
+    /* =========================================================
+       CONEXÃO COM O SUPABASE
+    ========================================================= */
+
+    const SUPABASE_URL =
+      "https://hhrrhrgmdhrrsfxsjaqa.supabase.co";
+
+    const SUPABASE_KEY =
+      "sb_publishable_u-n7uO69wNAygS-vV_R-Zw_-pCDRGSQ";
+
+    const supabaseClient =
+      supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_KEY
+      );
+
+
+    /* =========================================================
+       VARIÁVEIS
+    ========================================================= */
+
+    let turmaSelecionada = null;
+
+    let dadosRelatorio = [];
+
+    let participantesTurma = [];
+
+
+    /* =========================================================
+       ELEMENTOS DA TELA
+    ========================================================= */
+
+    const btnAbaTurmas =
+      document.getElementById("btnAbaTurmas");
+
+    const btnAbaRelatorios =
+      document.getElementById("btnAbaRelatorios");
+
+    const painelTurmas =
+      document.getElementById("painelTurmas");
+
+    const painelRelatorios =
+      document.getElementById("painelRelatorios");
+
+    const selectTurma =
+      document.getElementById("selectTurma");
+
+    const dataTurma =
+      document.getElementById("dataTurma");
+
+    const tabelaParticipantes =
+      document.getElementById("tabelaParticipantes");
+
+    const totalParticipantes =
+      document.getElementById("totalParticipantes");
+
+    const modalAdicionar =
+      document.getElementById("modalAdicionar");
+
+    const modalCpf =
+      document.getElementById("modalCpf");
+
+    const modalNome =
+      document.getElementById("modalNome");
+
+    const modalCracha =
+      document.getElementById("modalCracha");
+
+    const modalSetor =
+      document.getElementById("modalSetor");
+
+
+    /* =========================================================
+       ABAS
+    ========================================================= */
+
+    btnAbaTurmas.addEventListener(
+      "click",
+      function () {
+
+        btnAbaTurmas.classList.add("ativa");
+
+        btnAbaRelatorios.classList.remove("ativa");
+
+        painelTurmas.classList.remove("oculto");
+
+        painelRelatorios.classList.add("oculto");
+
+      }
+    );
+
+
+    btnAbaRelatorios.addEventListener(
+      "click",
+      function () {
+
+        btnAbaRelatorios.classList.add("ativa");
+
+        btnAbaTurmas.classList.remove("ativa");
+
+        painelRelatorios.classList.remove("oculto");
+
+        painelTurmas.classList.add("oculto");
+
+        carregarSetoresRelatorio();
+
+      }
+    );
+
+
+    /* =========================================================
+       MENSAGENS
+    ========================================================= */
+
+    function mostrarMensagem(
+      id,
+      mensagem,
+      tipo = "sucesso"
+    ) {
+
+      const elemento =
+        document.getElementById(id);
+
+      elemento.textContent =
+        mensagem;
+
+      elemento.className =
+        "mensagem " + tipo;
+
+    }
+
+
+    function limparMensagem(id) {
+
+      const elemento =
+        document.getElementById(id);
+
+      elemento.textContent = "";
+
+      elemento.className =
+        "mensagem";
+
+    }
+
+
+    /* =========================================================
+       DATA DE HOJE
+    ========================================================= */
+
+    function definirDataHoje() {
+
+      const hoje =
+        new Date();
+
+      const ano =
+        hoje.getFullYear();
+
+      const mes =
+        String(
+          hoje.getMonth() + 1
+        ).padStart(2, "0");
+
+      const dia =
+        String(
+          hoje.getDate()
+        ).padStart(2, "0");
+
+      const dataFormatada =
+        `${ano}-${mes}-${dia}`;
+
+      dataTurma.value =
+        dataFormatada;
+
+    }
+
+
+    /* =========================================================
+       FORMATAR DATA
+    ========================================================= */
+
+    function formatarData(data) {
+
+      if (!data) {
+        return "-";
+      }
+
+      const partes =
+        data.split("-");
+
+      if (partes.length !== 3) {
+        return data;
+      }
+
+      return (
+        partes[2] +
+        "/" +
+        partes[1] +
+        "/" +
+        partes[0]
+      );
+
+    }
+
+
+    /* =========================================================
+       CARREGAR TURMAS
+    ========================================================= */
+
+    async function carregarTurmas() {
+
+      selectTurma.innerHTML =
+        '<option value="">Selecione uma turma</option>';
+
+      const {
+        data,
+        error
+      } =
+        await supabaseClient
+          .from("turmas_integracao")
+          .select(
+            "id, data_integracao, descricao, ativo"
+          )
+          .eq(
+            "ativo",
+            true
+          )
+          .order(
+            "data_integracao",
+            {
+              ascending: false
+            }
+          );
+
+
+      if (error) {
+
+        console.error(error);
+
+        mostrarMensagem(
+          "mensagemTurmas",
+          "Não foi possível carregar as turmas.",
+          "erro"
+        );
+
+        return;
+      }
+
+
+      (data || []).forEach(
+        function (turma) {
+
+          const option =
+            document.createElement(
+              "option"
+            );
+
+          option.value =
+            turma.id;
+
+          const descricao =
+            turma.descricao
+              ? " - " + turma.descricao
+              : "";
+
+          option.textContent =
+            formatarData(
+              turma.data_integracao
+            ) +
+            descricao;
+
+          selectTurma.appendChild(
+            option
+          );
+
+        }
+      );
+
+    }
+
+
+    /* =========================================================
+       CRIAR NOVA TURMA
+    ========================================================= */
+
+    document
+      .getElementById("btnCriarTurma")
+      .addEventListener(
+        "click",
+        async function () {
+
+          limparMensagem(
+            "mensagemTurmas"
+          );
+
+          const data =
+            dataTurma.value;
+
+          if (!data) {
+
+            mostrarMensagem(
+              "mensagemTurmas",
+              "Selecione a data da integração.",
+              "erro"
+            );
+
+            return;
+          }
+
+
+          const descricao =
+            window.prompt(
+              "Digite um nome para a turma.\n\nExemplo: Integração Safra 26/27"
+            );
+
+
+          if (descricao === null) {
+            return;
+          }
+
+
+          const {
+            data: turmaCriada,
+            error
+          } =
+            await supabaseClient
+              .from(
+                "turmas_integracao"
+              )
+              .insert({
+                data_integracao:
+                  data,
+
+                descricao:
+                  descricao.trim() ||
+                  "Turma da Integração",
+
+                ativo:
+                  true
+              })
+              .select(
+                "id, data_integracao, descricao"
+              )
+              .single();
+
+
+          if (error) {
+
+            console.error(error);
+
+            mostrarMensagem(
+              "mensagemTurmas",
+              "Não foi possível criar a turma.",
+              "erro"
+            );
+
+            return;
+          }
+
+
+          mostrarMensagem(
+            "mensagemTurmas",
+            "Turma criada com sucesso.",
+            "sucesso"
+          );
+
+
+          await carregarTurmas();
+
+
+          selectTurma.value =
+            String(
+              turmaCriada.id
+            );
+
+
+          turmaSelecionada =
+            turmaCriada.id;
+
+
+          await carregarParticipantes(
+            turmaSelecionada
+          );
+
+        }
+      );
+
+
+    /* =========================================================
+       SELECIONAR TURMA
+    ========================================================= */
+
+    selectTurma.addEventListener(
+      "change",
+      async function () {
+
+        turmaSelecionada =
+          this.value
+            ? Number(this.value)
+            : null;
+
+
+        if (!turmaSelecionada) {
+
+          participantesTurma = [];
+
+          tabelaParticipantes.innerHTML = `
+            <tr>
+              <td
+                colspan="9"
+                style="
+                  text-align:center;
+                  padding:35px;
+                  color:#777;
+                "
+              >
+                Selecione uma turma para visualizar os participantes.
+              </td>
+            </tr>
+          `;
+
+          totalParticipantes.textContent =
+            "Total de participantes: 0";
+
+          return;
+        }
+
+
+        await carregarParticipantes(
+          turmaSelecionada
+        );
+
+      }
+    );
+
+
+    /* =========================================================
+       CARREGAR PARTICIPANTES DA TURMA
+    ========================================================= */
+
+    async function carregarParticipantes(
+      turmaId
+    ) {
+
+      tabelaParticipantes.innerHTML = `
+        <tr>
+          <td
+            colspan="9"
+            style="
+              text-align:center;
+              padding:35px;
+            "
+          >
+            Carregando...
+          </td>
+        </tr>
+      `;
+
+
+      const {
+        data,
+        error
+      } =
+        await supabaseClient
+          .from(
+            "vw_acompanhamento_integracao"
+          )
+          .select("*")
+          .eq(
+            "turma_id",
+            turmaId
+          )
+          .order(
+            "nome",
+            {
+              ascending: true
+            }
+          );
+
+
+      if (error) {
+
+        console.error(error);
+
+        tabelaParticipantes.innerHTML = `
+          <tr>
+            <td
+              colspan="9"
+              style="
+                text-align:center;
+                padding:35px;
+                color:#a51e1e;
+              "
+            >
+              Não foi possível carregar os participantes.
+            </td>
+          </tr>
+        `;
+
+        return;
+      }
+
+
+      participantesTurma =
+        data || [];
+
+
+      aplicarFiltroSetorTurma();
+
+      carregarSetoresTurma();
+
+    }
+
+
+    /* =========================================================
+       SETORES DA TURMA
+    ========================================================= */
+
+    function carregarSetoresTurma() {
+
+      const select =
+        document.getElementById(
+          "filtroSetorTurma"
+        );
+
+      const valorAtual =
+        select.value;
+
+      const setores =
+        [
+          ...new Set(
+            participantesTurma
+              .map(
+                item =>
+                  item.setor
+              )
+              .filter(Boolean)
+          )
+        ]
+        .sort();
+
+
+      select.innerHTML =
+        '<option value="">Todos</option>';
+
+
+      setores.forEach(
+        function (setor) {
+
+          const option =
+            document.createElement(
+              "option"
+            );
+
+          option.value =
+            setor;
+
+          option.textContent =
+            setor;
+
+          select.appendChild(
+            option
+          );
+
+        }
+      );
+
+
+      if (
+        setores.includes(
+          valorAtual
+        )
+      ) {
+
+        select.value =
+          valorAtual;
+
+      }
+
+    }
+
+
+    document
+      .getElementById(
+        "filtroSetorTurma"
+      )
+      .addEventListener(
+        "change",
+        aplicarFiltroSetorTurma
+      );
+
+
+    function aplicarFiltroSetorTurma() {
+
+      const setor =
+        document
+          .getElementById(
+            "filtroSetorTurma"
+          )
+          .value;
+
+
+      let lista =
+        participantesTurma;
+
+
+      if (setor) {
+
+        lista =
+          lista.filter(
+            item =>
+              item.setor === setor
+          );
+
+      }
+
+
+      renderizarParticipantes(
+        lista
+      );
+
+    }
+
+
+    /* =========================================================
+       RENDERIZAR PARTICIPANTES
+    ========================================================= */
+
+    function renderizarParticipantes(
+      lista
+    ) {
+
+      tabelaParticipantes.innerHTML =
+        "";
+
+
+      if (!lista.length) {
+
+        tabelaParticipantes.innerHTML = `
+          <tr>
+            <td
+              colspan="9"
+              style="
+                text-align:center;
+                padding:35px;
+                color:#777;
+              "
+            >
+              Nenhum participante encontrado nesta turma.
+            </td>
+          </tr>
+        `;
+
+        totalParticipantes.textContent =
+          "Total de participantes: 0";
+
+        return;
+      }
+
+
+      lista.forEach(
+        function (item) {
+
+          const tr =
+            document.createElement(
+              "tr"
+            );
+
+
+          const tentativas =
+            Number(
+              item.tentativas_finalizadas || 0
+            );
+
+
+          const nota =
+            item.melhor_nota === null ||
+            item.melhor_nota === undefined
+              ? "-"
+              : item.melhor_nota + "/11";
+
+
+          let classeStatus =
+            "nao-fez";
+
+
+          if (
+            item.situacao ===
+            "APROVADO"
+          ) {
+
+            classeStatus =
+              "aprovado";
+
+          } else if (
+            item.situacao ===
+            "NÃO PASSOU"
+          ) {
+
+            classeStatus =
+              "nao-passou";
+
+          } else if (
+            item.situacao ===
+            "EM ANDAMENTO"
+          ) {
+
+            classeStatus =
+              "andamento";
+
+          }
+
+
+          tr.innerHTML = `
+            <td>
+              <strong>
+                ${escaparHtml(item.nome || "-")}
+              </strong>
+            </td>
+
+            <td>
+              ${formatarCpf(item.cpf)}
+            </td>
+
+            <td>
+              ${escaparHtml(item.cracha || "-")}
+            </td>
+
+            <td>
+              ${escaparHtml(item.setor || "-")}
+            </td>
+
+            <td>
+              ${formatarData(item.data_integracao)}
+            </td>
+
+            <td>
+              ${tentativas}
+            </td>
+
+            <td>
+              ${nota}
+            </td>
+
+            <td>
+              <span class="status ${classeStatus}">
+                ${escaparHtml(item.situacao)}
+              </span>
+            </td>
+
+            <td>
+              <button
+                class="btn-excluir"
+                type="button"
+                onclick="
+                  removerParticipante(
+                    ${item.participante_id},
+                    '${escaparAtributo(item.nome || "")}'
+                  )
+                "
+              >
+                🗑️
+              </button>
+            </td>
+          `;
+
+
+          tabelaParticipantes.appendChild(
+            tr
+          );
+
+        }
+      );
+
+
+      totalParticipantes.textContent =
+        "Total de participantes: " +
+        lista.length;
+
+    }
+        /* =========================================================
+       CPF
+    ========================================================= */
+
+    function somenteNumeros(valor) {
+      return String(valor || "").replace(/\D/g, "");
+    }
+
+    function formatarCpf(valor) {
+
+      const cpf = somenteNumeros(valor);
+
+      if (cpf.length !== 11) {
+        return valor || "-";
+      }
+
+      return (
+        cpf.substring(0, 3) + "." +
+        cpf.substring(3, 6) + "." +
+        cpf.substring(6, 9) + "-" +
+        cpf.substring(9, 11)
+      );
+    }
+
+
+    modalCpf.addEventListener("input", function () {
+
+      let valor = somenteNumeros(this.value).substring(0, 11);
+
+      valor = valor.replace(
+        /^(\d{3})(\d)/,
+        "$1.$2"
+      );
+
+      valor = valor.replace(
+        /^(\d{3})\.(\d{3})(\d)/,
+        "$1.$2.$3"
+      );
+
+      valor = valor.replace(
+        /\.(\d{3})(\d)/,
+        ".$1-$2"
+      );
+
+      this.value = valor;
+    });
+
+
+    /* =========================================================
+       SEGURANÇA PARA TEXTO NA TELA
+    ========================================================= */
+
+    function escaparHtml(valor) {
+
+      return String(valor ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+
+    function escaparAtributo(valor) {
+
+      return String(valor ?? "")
+        .replaceAll("\\", "\\\\")
+        .replaceAll("'", "\\'");
+    }
+
+
+    /* =========================================================
+       ABRIR / FECHAR MODAL
+    ========================================================= */
+
+    document
+      .getElementById("btnAdicionar")
+      .addEventListener(
+        "click",
+        function () {
+
+          limparMensagem(
+            "mensagemModal"
+          );
+
+          if (!turmaSelecionada) {
+
+            mostrarMensagem(
+              "mensagemTurmas",
+              "Selecione uma turma antes de adicionar um colaborador.",
+              "erro"
+            );
+
+            return;
+          }
+
+          modalCpf.value = "";
+          modalNome.value = "";
+          modalCracha.value = "";
+          modalSetor.value = "";
+
+          modalAdicionar.classList.add(
+            "aberto"
+          );
+
+          setTimeout(
+            function () {
+              modalCpf.focus();
+            },
+            100
+          );
+        }
+      );
+
+
+    document
+      .getElementById("btnCancelarModal")
+      .addEventListener(
+        "click",
+        function () {
+
+          modalAdicionar.classList.remove(
+            "aberto"
+          );
+        }
+      );
+
+
+    modalAdicionar.addEventListener(
+      "click",
+      function (event) {
+
+        if (
+          event.target ===
+          modalAdicionar
+        ) {
+
+          modalAdicionar.classList.remove(
+            "aberto"
+          );
+        }
+      }
+    );
+
+
+    /* =========================================================
+       PROCURAR COLABORADOR PELO CPF
+    ========================================================= */
+
+    modalCpf.addEventListener(
+      "blur",
+      async function () {
+
+        const cpf =
+          somenteNumeros(
+            modalCpf.value
+          );
+
+        if (cpf.length !== 11) {
+          return;
+        }
+
+        const {
+          data,
+          error
+        } =
+          await supabaseClient
+            .from("colaboradores")
+            .select(
+              "id, cpf, nome, cracha, setor, ativo"
+            )
+            .eq(
+              "cpf",
+              cpf
+            )
+            .maybeSingle();
+
+
+        if (error) {
+
+          console.error(error);
+
+          return;
+        }
+
+
+        if (data) {
+
+          modalNome.value =
+            data.nome || "";
+
+          modalCracha.value =
+            data.cracha || "";
+
+          modalSetor.value =
+            data.setor || "";
+        }
+
+      }
+    );
+
+
+    /* =========================================================
+       SALVAR COLABORADOR NA TURMA
+    ========================================================= */
+
+    document
+      .getElementById(
+        "btnSalvarColaborador"
+      )
+      .addEventListener(
+        "click",
+        async function () {
+
+          limparMensagem(
+            "mensagemModal"
+          );
+
+          const cpf =
+            somenteNumeros(
+              modalCpf.value
+            );
+
+          const nome =
+            modalNome.value.trim();
+
+          const cracha =
+            modalCracha.value.trim();
+
+          const setor =
+            modalSetor.value.trim();
+
+
+          if (!turmaSelecionada) {
+
+            mostrarMensagem(
+              "mensagemModal",
+              "Nenhuma turma foi selecionada.",
+              "erro"
+            );
+
+            return;
+          }
+
+
+          if (cpf.length !== 11) {
+
+            mostrarMensagem(
+              "mensagemModal",
+              "Digite um CPF com 11 números.",
+              "erro"
+            );
+
+            return;
+          }
+
+
+          if (!nome) {
+
+            mostrarMensagem(
+              "mensagemModal",
+              "Informe o nome do colaborador.",
+              "erro"
+            );
+
+            return;
+          }
+
+
+          if (!setor) {
+
+            mostrarMensagem(
+              "mensagemModal",
+              "Informe o setor do colaborador.",
+              "erro"
+            );
+
+            return;
+          }
+
+
+          const botao =
+            document.getElementById(
+              "btnSalvarColaborador"
+            );
+
+          botao.disabled = true;
+          botao.textContent =
+            "SALVANDO...";
+
+
+          try {
+
+            /* -----------------------------------------
+               PROCURA SE O CPF JÁ EXISTE
+            ----------------------------------------- */
+
+            let {
+              data: colaborador,
+              error: erroBusca
+            } =
+              await supabaseClient
+                .from("colaboradores")
+                .select(
+                  "id, cpf, nome, cracha, setor, ativo"
+                )
+                .eq(
+                  "cpf",
+                  cpf
+                )
+                .maybeSingle();
+
+
+            if (erroBusca) {
+              throw erroBusca;
+            }
+
+
+            /* -----------------------------------------
+               SE NÃO EXISTIR, CADASTRA
+            ----------------------------------------- */
+
+            if (!colaborador) {
+
+              const {
+                data: novoColaborador,
+                error: erroCadastro
+              } =
+                await supabaseClient
+                  .from("colaboradores")
+                  .insert({
+                    cpf: cpf,
+                    nome: nome.toUpperCase(),
+                    cracha: cracha || null,
+                    setor: setor.toUpperCase(),
+                    ativo: true
+                  })
+                  .select(
+                    "id, cpf, nome, cracha, setor, ativo"
+                  )
+                  .single();
+
+
+              if (erroCadastro) {
+                throw erroCadastro;
+              }
+
+
+              colaborador =
+                novoColaborador;
+
+            } else {
+
+              /* -----------------------------------------
+                 ATUALIZA DADOS DO CADASTRO EXISTENTE
+              ----------------------------------------- */
+
+              const {
+                data: atualizado,
+                error: erroAtualizacao
+              } =
+                await supabaseClient
+                  .from("colaboradores")
+                  .update({
+                    nome:
+                      nome.toUpperCase(),
+
+                    cracha:
+                      cracha || null,
+
+                    setor:
+                      setor.toUpperCase(),
+
+                    ativo:
+                      true
+                  })
+                  .eq(
+                    "id",
+                    colaborador.id
+                  )
+                  .select(
+                    "id, cpf, nome, cracha, setor, ativo"
+                  )
+                  .single();
+
+
+              if (erroAtualizacao) {
+                throw erroAtualizacao;
+              }
+
+
+              colaborador =
+                atualizado;
+            }
+
+
+            /* -----------------------------------------
+               COLOCA NA TURMA
+            ----------------------------------------- */
+
+            const {
+              error: erroTurma
+            } =
+              await supabaseClient
+                .from(
+                  "turma_participantes"
+                )
+                .insert({
+                  turma_id:
+                    turmaSelecionada,
+
+                  colaborador_id:
+                    colaborador.id
+                });
+
+
+            if (erroTurma) {
+
+              if (
+                erroTurma.code ===
+                "23505"
+              ) {
+
+                throw new Error(
+                  "Este colaborador já está cadastrado nesta turma."
+                );
+              }
+
+              throw erroTurma;
+            }
+
+
+            modalAdicionar.classList.remove(
+              "aberto"
+            );
+
+
+            mostrarMensagem(
+              "mensagemTurmas",
+              "Colaborador adicionado à turma com sucesso.",
+              "sucesso"
+            );
+
+
+            await carregarParticipantes(
+              turmaSelecionada
+            );
+
+          } catch (erro) {
+
+            console.error(erro);
+
+            mostrarMensagem(
+              "mensagemModal",
+              erro.message ||
+              "Não foi possível salvar o colaborador.",
+              "erro"
+            );
+
+          } finally {
+
+            botao.disabled = false;
+
+            botao.textContent =
+              "SALVAR COLABORADOR";
+          }
+
+        }
+      );
+
+
+    /* =========================================================
+       REMOVER DA TURMA
+    ========================================================= */
+
+    async function removerParticipante(
+      participanteId,
+      nome
+    ) {
+
+      const confirmar =
+        window.confirm(
+          "Remover " +
+          nome +
+          " desta turma?\n\nO cadastro do colaborador e as provas realizadas não serão apagados."
+        );
+
+
+      if (!confirmar) {
+        return;
+      }
+
+
+      const {
+        error
+      } =
+        await supabaseClient
+          .from(
+            "turma_participantes"
+          )
+          .delete()
+          .eq(
+            "id",
+            participanteId
+          );
+
+
+      if (error) {
+
+        console.error(error);
+
+        mostrarMensagem(
+          "mensagemTurmas",
+          "Não foi possível remover o participante.",
+          "erro"
+        );
+
+        return;
+      }
+
+
+      mostrarMensagem(
+        "mensagemTurmas",
+        "Participante removido da turma.",
+        "sucesso"
+      );
+
+
+      await carregarParticipantes(
+        turmaSelecionada
+      );
+    }
+
+
+    /* =========================================================
+       CARREGAR SETORES DO RELATÓRIO
+    ========================================================= */
+
+    async function carregarSetoresRelatorio() {
+
+      const {
+        data,
+        error
+      } =
+        await supabaseClient
+          .from(
+            "vw_acompanhamento_integracao"
+          )
+          .select("setor");
+
+
+      if (error) {
+        console.error(error);
+        return;
+      }
+
+
+      const setores =
+        [
+          ...new Set(
+            (data || [])
+              .map(
+                item =>
+                  item.setor
+              )
+              .filter(Boolean)
+          )
+        ]
+        .sort();
+
+
+      const select =
+        document.getElementById(
+          "filtroSetorRelatorio"
+        );
+
+
+      const atual =
+        select.value;
+
+
+      select.innerHTML =
+        '<option value="">Todos</option>';
+
+
+      setores.forEach(
+        function (setor) {
+
+          const option =
+            document.createElement(
+              "option"
+            );
+
+          option.value =
+            setor;
+
+          option.textContent =
+            setor;
+
+          select.appendChild(
+            option
+          );
+        }
+      );
+
+
+      if (
+        setores.includes(atual)
+      ) {
+
+        select.value =
+          atual;
+      }
+    }
+
+
+    /* =========================================================
+       BUSCAR RELATÓRIO
+    ========================================================= */
+
+    document
+      .getElementById(
+        "btnBuscarRelatorio"
+      )
+      .addEventListener(
+        "click",
+        buscarRelatorio
+      );
+
+
+    async function buscarRelatorio() {
+
+      limparMensagem(
+        "mensagemRelatorios"
+      );
+
+
+      const dataInicial =
+        document
+          .getElementById(
+            "dataInicial"
+          )
+          .value;
+
+
+      const dataFinal =
+        document
+          .getElementById(
+            "dataFinal"
+          )
+          .value;
+
+
+      const setor =
+        document
+          .getElementById(
+            "filtroSetorRelatorio"
+          )
+          .value;
+
+
+      const situacao =
+        document
+          .getElementById(
+            "filtroSituacao"
+          )
+          .value;
+
+
+      const colaborador =
+        document
+          .getElementById(
+            "filtroColaborador"
+          )
+          .value
+          .trim();
+
+
+      let consulta =
+        supabaseClient
+          .from(
+            "vw_acompanhamento_integracao"
+          )
+          .select("*")
+          .order(
+            "data_integracao",
+            {
+              ascending: false
+            }
+          )
+          .order(
+            "nome",
+            {
+              ascending: true
+            }
+          );
+
+
+      if (dataInicial) {
+
+        consulta =
+          consulta.gte(
+            "data_integracao",
+            dataInicial
+          );
+      }
+
+
+      if (dataFinal) {
+
+        consulta =
+          consulta.lte(
+            "data_integracao",
+            dataFinal
+          );
+      }
+
+
+      if (setor) {
+
+        consulta =
+          consulta.eq(
+            "setor",
+            setor
+          );
+      }
+
+
+      if (situacao) {
+
+        consulta =
+          consulta.eq(
+            "situacao",
+            situacao
+          );
+      }
+
+
+      const {
+        data,
+        error
+      } =
+        await consulta;
+
+
+      if (error) {
+
+        console.error(error);
+
+        mostrarMensagem(
+          "mensagemRelatorios",
+          "Não foi possível gerar o relatório.",
+          "erro"
+        );
+
+        return;
+      }
+
+
+      let lista =
+        data || [];
+
+
+      if (colaborador) {
+
+        const busca =
+          colaborador
+            .toUpperCase();
+
+
+        const numeros =
+          somenteNumeros(
+            colaborador
+          );
+
+
+        lista =
+          lista.filter(
+            function (item) {
+
+              const nome =
+                String(
+                  item.nome || ""
+                )
+                .toUpperCase();
+
+
+              const cpf =
+                somenteNumeros(
+                  item.cpf
+                );
+
+
+              const cracha =
+                somenteNumeros(
+                  item.cracha
+                );
+
+
+              return (
+                nome.includes(busca) ||
+
+                (
+                  numeros &&
+                  cpf.includes(numeros)
+                ) ||
+
+                (
+                  numeros &&
+                  cracha.includes(numeros)
+                )
+              );
+            }
+          );
+      }
+
+
+      dadosRelatorio =
+        lista;
+
+
+      renderizarRelatorio(
+        dadosRelatorio
+      );
+    }
+
+
+    /* =========================================================
+       RENDERIZAR RELATÓRIO
+    ========================================================= */
+
+    function renderizarRelatorio(
+      lista
+    ) {
+
+      const tbody =
+        document.getElementById(
+          "tabelaRelatorio"
+        );
+
+
+      tbody.innerHTML = "";
+
+
+      if (!lista.length) {
+
+        tbody.innerHTML = `
+          <tr>
+            <td
+              colspan="8"
+              style="
+                text-align:center;
+                padding:35px;
+                color:#777;
+              "
+            >
+              Nenhum registro encontrado.
+            </td>
+          </tr>
+        `;
+      }
+
+
+      lista.forEach(
+        function (item) {
+
+          const tr =
+            document.createElement(
+              "tr"
+            );
+
+
+          let classeStatus =
+            "nao-fez";
+
+
+          if (
+            item.situacao ===
+            "APROVADO"
+          ) {
+
+            classeStatus =
+              "aprovado";
+
+          } else if (
+            item.situacao ===
+            "NÃO PASSOU"
+          ) {
+
+            classeStatus =
+              "nao-passou";
+
+          } else if (
+            item.situacao ===
+            "EM ANDAMENTO"
+          ) {
+
+            classeStatus =
+              "andamento";
+          }
+
+
+          const nota =
+            item.melhor_nota === null ||
+            item.melhor_nota === undefined
+              ? "-"
+              : item.melhor_nota +
+                "/11";
+
+
+          tr.innerHTML = `
+            <td>
+              <strong>
+                ${escaparHtml(item.nome || "-")}
+              </strong>
+            </td>
+
+            <td>
+              ${formatarCpf(item.cpf)}
+            </td>
+
+            <td>
+              ${escaparHtml(item.cracha || "-")}
+            </td>
+
+            <td>
+              ${escaparHtml(item.setor || "-")}
+            </td>
+
+            <td>
+              ${formatarData(item.data_integracao)}
+            </td>
+
+            <td>
+              ${Number(item.tentativas_finalizadas || 0)}
+            </td>
+
+            <td>
+              ${nota}
+            </td>
+
+            <td>
+              <span class="status ${classeStatus}">
+                ${escaparHtml(item.situacao)}
+              </span>
+            </td>
+          `;
+
+
+          tbody.appendChild(
+            tr
+          );
+        }
+      );
+
+
+      document
+        .getElementById(
+          "totalRelatorio"
+        )
+        .textContent =
+          "Registros encontrados: " +
+          lista.length;
+
+
+      atualizarIndicadores(
+        lista
+      );
+    }
+
+
+    /* =========================================================
+       INDICADORES
+    ========================================================= */
+
+    function atualizarIndicadores(
+      lista
+    ) {
+
+      const previstos =
+        lista.length;
+
+
+      const naoFez =
+        lista.filter(
+          item =>
+            item.situacao ===
+            "NÃO FEZ"
+        ).length;
+
+
+      const naoPassou =
+        lista.filter(
+          item =>
+            item.situacao ===
+            "NÃO PASSOU" ||
+            item.situacao ===
+            "EM ANDAMENTO"
+        ).length;
+
+
+      const aprovados =
+        lista.filter(
+          item =>
+            item.situacao ===
+            "APROVADO"
+        ).length;
+
+
+      document
+        .getElementById(
+          "indicadorPrevistos"
+        )
+        .textContent =
+          previstos;
+
+
+      document
+        .getElementById(
+          "indicadorNaoFez"
+        )
+        .textContent =
+          naoFez;
+
+
+      document
+        .getElementById(
+          "indicadorNaoPassou"
+        )
+        .textContent =
+          naoPassou;
+
+
+      document
+        .getElementById(
+          "indicadorAprovados"
+        )
+        .textContent =
+          aprovados;
+    }
+        /* =========================================================
+       LIMPAR FILTROS DO RELATÓRIO
+    ========================================================= */
+
+    document
+      .getElementById("btnLimparRelatorio")
+      .addEventListener(
+        "click",
+        function () {
+
+          document.getElementById("dataInicial").value = "";
+          document.getElementById("dataFinal").value = "";
+          document.getElementById("filtroSetorRelatorio").value = "";
+          document.getElementById("filtroSituacao").value = "";
+          document.getElementById("filtroColaborador").value = "";
+
+          dadosRelatorio = [];
+
+          document.getElementById("tabelaRelatorio").innerHTML = `
+            <tr>
+              <td
+                colspan="8"
+                style="
+                  text-align:center;
+                  padding:35px;
+                  color:#777;
+                "
+              >
+                Utilize os filtros acima para consultar os participantes.
+              </td>
+            </tr>
+          `;
+
+          document.getElementById("totalRelatorio").textContent =
+            "Registros encontrados: 0";
+
+          atualizarIndicadores([]);
+        }
+      );
+
+
+    /* =========================================================
+       EXPORTAR RELATÓRIO PARA EXCEL
+       Gera CSV compatível com Excel
+    ========================================================= */
+
+    document
+      .getElementById("btnExportarExcel")
+      .addEventListener(
+        "click",
+        function () {
+
+          if (!dadosRelatorio.length) {
+
+            mostrarMensagem(
+              "mensagemRelatorios",
+              "Faça uma consulta antes de exportar o relatório.",
+              "erro"
+            );
+
+            return;
+          }
+
+
+          const linhas = [];
+
+          linhas.push([
+            "COLABORADOR",
+            "CPF",
+            "CRACHÁ",
+            "SETOR",
+            "DATA DA INTEGRAÇÃO",
+            "TENTATIVAS FINALIZADAS",
+            "MELHOR NOTA",
+            "SITUAÇÃO"
+          ]);
+
+
+          dadosRelatorio.forEach(
+            function (item) {
+
+              linhas.push([
+                item.nome || "",
+                formatarCpf(item.cpf),
+                item.cracha || "",
+                item.setor || "",
+                formatarData(item.data_integracao),
+                Number(item.tentativas_finalizadas || 0),
+                item.melhor_nota === null ||
+                item.melhor_nota === undefined
+                  ? ""
+                  : item.melhor_nota + "/11",
+                item.situacao || ""
+              ]);
+            }
+          );
+
+
+          const csv =
+            linhas
+              .map(
+                linha =>
+                  linha
+                    .map(
+                      valor =>
+                        '"' +
+                        String(valor ?? "")
+                          .replaceAll('"', '""') +
+                        '"'
+                    )
+                    .join(";")
+              )
+              .join("\n");
+
+
+          const blob =
+            new Blob(
+              [
+                "\uFEFF" + csv
+              ],
+              {
+                type:
+                  "text/csv;charset=utf-8;"
+              }
+            );
+
+
+          const url =
+            URL.createObjectURL(
+              blob
+            );
+
+
+          const link =
+            document.createElement(
+              "a"
+            );
+
+
+          link.href =
+            url;
+
+
+          link.download =
+            "Relatorio_Integracao_" +
+            new Date()
+              .toISOString()
+              .slice(0, 10) +
+            ".csv";
+
+
+          document.body.appendChild(
+            link
+          );
+
+
+          link.click();
+
+
+          document.body.removeChild(
+            link
+          );
+
+
+          URL.revokeObjectURL(
+            url
+          );
+
+        }
+      );
+
+
+    /* =========================================================
+       IMPORTAR EXCEL / CSV
+
+       Nesta primeira versão:
+       - CSV funciona diretamente.
+       - XLS/XLSX será implementado depois com SheetJS.
+       ========================================================= */
+
+    const arquivoExcel =
+      document.getElementById(
+        "arquivoExcel"
+      );
+
+
+    document
+      .getElementById("btnImportar")
+      .addEventListener(
+        "click",
+        function () {
+
+          limparMensagem(
+            "mensagemTurmas"
+          );
+
+
+          if (!turmaSelecionada) {
+
+            mostrarMensagem(
+              "mensagemTurmas",
+              "Selecione uma turma antes de importar colaboradores.",
+              "erro"
+            );
+
+            return;
+          }
+
+
+          arquivoExcel.value = "";
+
+          arquivoExcel.click();
+        }
+      );
+
+
+    arquivoExcel.addEventListener(
+      "change",
+      async function () {
+
+        const arquivo =
+          this.files?.[0];
+
+
+        if (!arquivo) {
+          return;
+        }
+
+
+        const nomeArquivo =
+          arquivo.name.toLowerCase();
+
+
+        /*
+          Vamos liberar CSV agora.
+
+          XLS/XLSX será colocado depois que
+          testarmos primeiro o cadastro manual.
+        */
+
+        if (
+          !nomeArquivo.endsWith(".csv")
+        ) {
+
+          mostrarMensagem(
+            "mensagemTurmas",
+            "Por enquanto, utilize um arquivo CSV. Depois vamos liberar a importação direta de Excel (.xlsx).",
+            "erro"
+          );
+
+          return;
+        }
+
+
+        try {
+
+          const texto =
+            await arquivo.text();
+
+
+          await importarCsv(
+            texto
+          );
+
+        } catch (erro) {
+
+          console.error(
+            erro
+          );
+
+
+          mostrarMensagem(
+            "mensagemTurmas",
+            erro.message ||
+            "Não foi possível importar o arquivo.",
+            "erro"
+          );
+        }
+
+      }
+    );
+
+
+    /* =========================================================
+       IMPORTAR CSV
+    ========================================================= */
+
+    async function importarCsv(
+      texto
+    ) {
+
+      /*
+        Modelo esperado:
+
+        CPF;NOME;CRACHA;SETOR
+        00000000000;JOÃO SILVA;12345;RECEBIMENTO
+      */
+
+
+      const linhas =
+        String(texto || "")
+          .replace(/\r/g, "")
+          .split("\n")
+          .filter(
+            linha =>
+              linha.trim()
+          );
+
+
+      if (linhas.length < 2) {
+
+        throw new Error(
+          "O arquivo está vazio ou não possui participantes."
+        );
+      }
+
+
+      const separador =
+        linhas[0].includes(";")
+          ? ";"
+          : ",";
+
+
+      const cabecalho =
+        linhas[0]
+          .split(separador)
+          .map(
+            item =>
+              item
+                .trim()
+                .toUpperCase()
+                .normalize("NFD")
+                .replace(
+                  /[\u0300-\u036f]/g,
+                  ""
+                )
+          );
+
+
+      const indiceCpf =
+        cabecalho.indexOf(
+          "CPF"
+        );
+
+
+      const indiceNome =
+        cabecalho.indexOf(
+          "NOME"
+        );
+
+
+      const indiceCracha =
+        cabecalho.findIndex(
+          item =>
+            item === "CRACHA" ||
+            item === "CRACHÁ"
+        );
+
+
+      const indiceSetor =
+        cabecalho.indexOf(
+          "SETOR"
+        );
+
+
+      if (
+        indiceCpf < 0 ||
+        indiceNome < 0 ||
+        indiceSetor < 0
+      ) {
+
+        throw new Error(
+          "O arquivo precisa possuir as colunas CPF, NOME e SETOR."
+        );
+      }
+
+
+      let adicionados = 0;
+      let repetidos = 0;
+      let erros = 0;
+
+
+      for (
+        let i = 1;
+        i < linhas.length;
+        i++
+      ) {
+
+        const colunas =
+          linhas[i]
+            .split(separador)
+            .map(
+              item =>
+                item
+                  .trim()
+                  .replace(
+                    /^"|"$/g,
+                    ""
+                  )
+            );
+
+
+        const cpf =
+          somenteNumeros(
+            colunas[indiceCpf]
+          );
+
+
+        const nome =
+          String(
+            colunas[indiceNome] ||
+            ""
+          )
+          .trim();
+
+
+        const cracha =
+          indiceCracha >= 0
+            ? String(
+                colunas[indiceCracha] ||
+                ""
+              ).trim()
+            : "";
+
+
+        const setor =
+          String(
+            colunas[indiceSetor] ||
+            ""
+          )
+          .trim();
+
+
+        if (
+          cpf.length !== 11 ||
+          !nome ||
+          !setor
+        ) {
+
+          erros++;
+          continue;
+        }
+
+
+        try {
+
+          let {
+            data: colaborador,
+            error: erroBusca
+          } =
+            await supabaseClient
+              .from(
+                "colaboradores"
+              )
+              .select(
+                "id"
+              )
+              .eq(
+                "cpf",
+                cpf
+              )
+              .maybeSingle();
+
+
+          if (erroBusca) {
+            throw erroBusca;
+          }
+
+
+          if (!colaborador) {
+
+            const {
+              data: novo,
+              error: erroNovo
+            } =
+              await supabaseClient
+                .from(
+                  "colaboradores"
+                )
+                .insert({
+                  cpf: cpf,
+                  nome:
+                    nome.toUpperCase(),
+                  cracha:
+                    cracha || null,
+                  setor:
+                    setor.toUpperCase(),
+                  ativo:
+                    true
+                })
+                .select(
+                  "id"
+                )
+                .single();
+
+
+            if (erroNovo) {
+              throw erroNovo;
+            }
+
+
+            colaborador =
+              novo;
+
+          } else {
+
+            const {
+              error: erroAtualizacao
+            } =
+              await supabaseClient
+                .from(
+                  "colaboradores"
+                )
+                .update({
+                  nome:
+                    nome.toUpperCase(),
+                  cracha:
+                    cracha || null,
+                  setor:
+                    setor.toUpperCase(),
+                  ativo:
+                    true
+                })
+                .eq(
+                  "id",
+                  colaborador.id
+                );
+
+
+            if (erroAtualizacao) {
+              throw erroAtualizacao;
+            }
+          }
+
+
+          const {
+            error: erroParticipante
+          } =
+            await supabaseClient
+              .from(
+                "turma_participantes"
+              )
+              .insert({
+                turma_id:
+                  turmaSelecionada,
+                colaborador_id:
+                  colaborador.id
+              });
+
+
+          if (erroParticipante) {
+
+            if (
+              erroParticipante.code ===
+              "23505"
+            ) {
+
+              repetidos++;
+
+            } else {
+
+              throw erroParticipante;
+            }
+
+          } else {
+
+            adicionados++;
+          }
+
+
+        } catch (erro) {
+
+          console.error(
+            "Erro na linha " +
+            (i + 1),
+            erro
+          );
+
+          erros++;
+        }
+      }
+
+
+      await carregarParticipantes(
+        turmaSelecionada
+      );
+
+
+      mostrarMensagem(
+        "mensagemTurmas",
+        "Importação concluída. " +
+        adicionados +
+        " adicionado(s), " +
+        repetidos +
+        " já existente(s) e " +
+        erros +
+        " com erro.",
+        erros > 0
+          ? "erro"
+          : "sucesso"
+      );
+    }
+
+
+    /* =========================================================
+       INICIALIZAÇÃO
+    ========================================================= */
+
+    async function iniciarPagina() {
+
+      definirDataHoje();
+
+      await carregarTurmas();
+
+      await carregarSetoresRelatorio();
+
+    }
+
+
+    iniciarPagina();
+
+  </script>
+
+</body>
+</html>

@@ -2944,26 +2944,7 @@
           arquivoExcel.click();
         }
       );
-btnImportar.addEventListener(
-  "click",
-  function () {
 
-    if (!turmaSelecionada) {
-      mostrarMensagem(
-        "mensagemTurmas",
-        "Selecione uma turma antes de importar os participantes.",
-        "erro"
-      );
-      return;
-    }
-
-    // Limpa o arquivo anterior para permitir
-    // selecionar o mesmo CSV novamente.
-    arquivoExcel.value = "";
-
-    arquivoExcel.click();
-  }
-);  
     arquivoExcel.addEventListener(
       "change",
       async function () {
